@@ -11,5 +11,9 @@ sqlx = { workspace = true }
 tracing = { workspace = true }
 anyhow = { workspace = true }
 clap = { workspace = true }
+serde = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
+
+[dev-dependencies]
+oracle = { workspace = true }

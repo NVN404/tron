@@ -42,12 +42,12 @@ DECLARE
     old_bucket TIMESTAMPTZ;
 BEGIN
     IF (TG_OP = 'INSERT') THEN
-        new_bucket := date_trunc('hour', NEW.created_at AT TIME ZONE 'Asia/Kolkata');
+        new_bucket := date_trunc('hour', NEW.created_at AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata';
         INSERT INTO outbox (tenant_id, bucket_hour) VALUES (NEW.tenant_id, new_bucket);
         RETURN NEW;
     ELSIF (TG_OP = 'UPDATE') THEN
-        new_bucket := date_trunc('hour', NEW.created_at AT TIME ZONE 'Asia/Kolkata');
-        old_bucket := date_trunc('hour', OLD.created_at AT TIME ZONE 'Asia/Kolkata');
+        new_bucket := date_trunc('hour', NEW.created_at AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata';
+        old_bucket := date_trunc('hour', OLD.created_at AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata';
 
         -- Always append NEW bucket
         INSERT INTO outbox (tenant_id, bucket_hour) VALUES (NEW.tenant_id, new_bucket);
@@ -59,7 +59,7 @@ BEGIN
 
         RETURN NEW;
     ELSIF (TG_OP = 'DELETE') THEN
-        old_bucket := date_trunc('hour', OLD.created_at AT TIME ZONE 'Asia/Kolkata');
+        old_bucket := date_trunc('hour', OLD.created_at AT TIME ZONE 'Asia/Kolkata') AT TIME ZONE 'Asia/Kolkata';
         INSERT INTO outbox (tenant_id, bucket_hour) VALUES (OLD.tenant_id, old_bucket);
         RETURN OLD;
     END IF;

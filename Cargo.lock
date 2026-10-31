@@ -3221,6 +3221,8 @@ dependencies = [
  "chrono",
  "clap",
  "common",
+ "oracle",
+ "serde",
  "sqlx",
  "tokio",
  "tracing",
