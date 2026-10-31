@@ -8,6 +8,9 @@ license.workspace = true
 common = { workspace = true }
 tokio = { workspace = true }
 sqlx = { workspace = true }
+tokio-postgres = { version = "0.7", features = ["with-uuid-1", "with-chrono-0_4"] }
+futures-util = "0.3"
+bytes = "1"
 clap = { workspace = true }
 tracing = { workspace = true }
 anyhow = { workspace = true }
