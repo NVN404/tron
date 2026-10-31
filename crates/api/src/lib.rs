@@ -40,9 +40,15 @@ pub fn create_app(pool: PgPool) -> Router {
         .route("/tenants/:id/orders/breakdown", get(routes::get_order_breakdown))
         .layer(middleware::from_fn_with_state(pool.clone(), auth::auth_middleware));
 
+    let admin_routes = Router::new()
+        .route("/admin/tenants/:id/quarantine", axum::routing::post(routes::set_quarantine))
+        .route("/admin/tenants/:id/unquarantine", axum::routing::post(routes::remove_quarantine));
+
     Router::new()
         .route("/health", get(health_check))
+        .route("/metrics", get(routes::get_metrics))
         .merge(api_routes)
+        .merge(admin_routes)
         .layer(middleware::from_fn(zero_cache_middleware))
         .with_state(pool)
 }

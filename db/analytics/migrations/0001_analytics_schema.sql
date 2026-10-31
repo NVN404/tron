@@ -128,6 +128,7 @@ GRANT SELECT ON agg_hourly TO api_ro;
 GRANT SELECT ON agg_hourly_product TO api_ro;
 GRANT SELECT ON bucket_state TO api_ro;
 GRANT SELECT ON tenants TO api_ro;
+GRANT UPDATE (health) ON tenants TO api_ro;
 GRANT SELECT ON api_keys TO api_ro;
 GRANT INSERT ON audit_log TO api_ro;
 GRANT USAGE, SELECT ON SEQUENCE audit_log_id_seq TO api_ro;

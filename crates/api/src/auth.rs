@@ -30,8 +30,8 @@ pub async fn auth_middleware(
 ) -> Result<Response, Response> {
     let path = req.uri().path().to_string();
 
-    // Skip auth for health and metrics
-    if path == "/health" || path == "/metrics" || path == "/status" {
+    // Skip auth for health, metrics, and admin management endpoints
+    if path == "/health" || path == "/metrics" || path == "/status" || path.starts_with("/admin/") {
         return Ok(next.run(req).await);
     }
 

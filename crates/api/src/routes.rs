@@ -377,3 +377,104 @@ pub async fn get_order_breakdown(
     }))
     .into_response())
 }
+
+/// 5. Metrics Endpoint
+pub async fn get_metrics(
+    State(pool): State<PgPool>,
+) -> Result<Response, (StatusCode, Json<serde_json::Value>)> {
+    let healthy_count: (i64,) = sqlx::query_as("SELECT count(*) FROM tenants WHERE health = 'healthy'")
+        .fetch_one(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    let quarantined_count: (i64,) = sqlx::query_as("SELECT count(*) FROM tenants WHERE health = 'quarantined'")
+        .fetch_one(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    let total_rollups: (i64,) = sqlx::query_as("SELECT count(*) FROM agg_hourly")
+        .fetch_one(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    let total_sales: (i64,) = sqlx::query_as("SELECT COALESCE(SUM(sales_paise), 0)::BIGINT FROM agg_hourly")
+        .fetch_one(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    let dead_letter_count: (i64,) = sqlx::query_as("SELECT count(*) FROM dead_letter")
+        .fetch_one(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    Ok(Json(json!({
+        "status": "healthy",
+        "tenants": {
+            "healthy": healthy_count.0,
+            "quarantined": quarantined_count.0,
+        },
+        "rollups": {
+            "hourly_records": total_rollups.0,
+            "total_sales_paise": total_sales.0,
+        },
+        "dead_letter_queue_size": dead_letter_count.0,
+    }))
+    .into_response())
+}
+
+#[derive(Debug, Deserialize)]
+pub struct QuarantinePayload {
+    pub reason: Option<String>,
+}
+
+/// 6. Admin Quarantine Endpoint
+pub async fn set_quarantine(
+    State(pool): State<PgPool>,
+    Path(tenant_id): Path<Uuid>,
+    Json(payload): Json<QuarantinePayload>,
+) -> Result<Response, (StatusCode, Json<serde_json::Value>)> {
+    sqlx::query("UPDATE tenants SET health = 'quarantined' WHERE id = $1")
+        .bind(tenant_id)
+        .execute(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    sqlx::query("INSERT INTO audit_log (tenant_id, action, details) VALUES ($1, 'ADMIN_QUARANTINE', $2)")
+        .bind(tenant_id)
+        .bind(json!({ "reason": payload.reason.unwrap_or_else(|| "Manual administrative quarantine".to_string()) }))
+        .execute(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    Ok(Json(json!({
+        "tenant_id": tenant_id,
+        "health": "quarantined",
+        "message": "Tenant has been placed in quarantine"
+    }))
+    .into_response())
+}
+
+/// 7. Admin Unquarantine Endpoint
+pub async fn remove_quarantine(
+    State(pool): State<PgPool>,
+    Path(tenant_id): Path<Uuid>,
+) -> Result<Response, (StatusCode, Json<serde_json::Value>)> {
+    sqlx::query("UPDATE tenants SET health = 'healthy' WHERE id = $1")
+        .bind(tenant_id)
+        .execute(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    sqlx::query("INSERT INTO audit_log (tenant_id, action, details) VALUES ($1, 'ADMIN_UNQUARANTINE', NULL)")
+        .bind(tenant_id)
+        .execute(&pool)
+        .await
+        .map_err(internal_error)?;
+
+    Ok(Json(json!({
+        "tenant_id": tenant_id,
+        "health": "healthy",
+        "message": "Tenant quarantine lifted"
+    }))
+    .into_response())
+}

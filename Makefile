@@ -53,3 +53,6 @@ test:
 bench:
 	@echo "Running benchmark harness..."
 	cargo run --bin bench
+
+demo:
+	@./scripts/demo.sh
