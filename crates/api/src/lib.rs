@@ -1,12 +1,13 @@
 use axum::{
     http::{header, HeaderValue},
     middleware::{self, Next},
-    response::Response,
+    response::{Html, Response},
     routing::get,
     Json, Router,
 };
 use serde_json::json;
 use sqlx::PgPool;
+use tower_http::cors::CorsLayer;
 
 pub mod auth;
 pub mod routes;
@@ -32,6 +33,10 @@ async fn health_check() -> Json<serde_json::Value> {
     Json(json!({ "status": "healthy", "service": "analytics-api" }))
 }
 
+async fn serve_dashboard() -> Html<&'static str> {
+    Html(include_str!("../static/dashboard.html"))
+}
+
 pub fn create_app(pool: PgPool) -> Router {
     let api_routes = Router::new()
         .route("/tenants/:id/orders/count", get(routes::get_order_count))
@@ -45,10 +50,13 @@ pub fn create_app(pool: PgPool) -> Router {
         .route("/admin/tenants/:id/unquarantine", axum::routing::post(routes::remove_quarantine));
 
     Router::new()
+        .route("/", get(serve_dashboard))
+        .route("/dashboard", get(serve_dashboard))
         .route("/health", get(health_check))
         .route("/metrics", get(routes::get_metrics))
         .merge(api_routes)
         .merge(admin_routes)
         .layer(middleware::from_fn(zero_cache_middleware))
+        .layer(CorsLayer::permissive())
         .with_state(pool)
 }

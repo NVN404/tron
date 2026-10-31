@@ -123,3 +123,4 @@ async fn test_rls_isolation_and_security_guarantees() -> anyhow::Result<()> {
     println!("✅ All Phase 4 RLS isolation and security self-check tests passed!");
     Ok(())
 }
+
