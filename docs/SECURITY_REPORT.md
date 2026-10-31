@@ -80,3 +80,4 @@ The security guarantees are proven through automated tests in `crates/api/tests/
 | `test_attack_suite_unset_tenant_context` | Unauthenticated query with unset `app.tenant_id` returning 0 rows | **PASSED** |
 | `test_attack_suite_sql_injection_defense` | SQL injection in path and auth headers rejected | **PASSED** |
 | `test_attack_suite_superuser_refusal` | API refuses to boot if connected as superuser | **PASSED** |
+

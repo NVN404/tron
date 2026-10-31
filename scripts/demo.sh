@@ -33,3 +33,4 @@ cargo run -p bench
 echo -e "${CYAN}========================================================================${NC}"
 echo -e "${GREEN}   ALL LIVE DEMO PROOFS COMPLETED SUCCESSFULLY!                         ${NC}"
 echo -e "${CYAN}========================================================================${NC}"
+

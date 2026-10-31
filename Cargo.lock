@@ -90,8 +90,11 @@ dependencies = [
  "axum",
  "chrono",
  "common",
+ "hex",
+ "oracle",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "sqlx",
  "tokio",
  "tower",
@@ -222,6 +225,8 @@ name = "bench"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "api",
+ "axum",
  "chrono",
  "clap",
  "common",
@@ -231,8 +236,10 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tokio",
+ "tower",
  "tracing",
  "uuid",
+ "worker",
 ]
 
 [[package]]
@@ -3223,6 +3230,7 @@ dependencies = [
  "common",
  "oracle",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
  "tracing",

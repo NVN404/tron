@@ -59,3 +59,4 @@ pub struct WorkerMetrics {
     pub rejected_stale_count: u64,
     pub failed_count: u64,
 }
+

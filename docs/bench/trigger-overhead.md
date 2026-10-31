@@ -28,3 +28,4 @@ The lightweight trigger achieves minimal overhead (**~2.4%**) because:
 1. **Zero Joins & Zero Aggregation:** The trigger function executes no `JOIN`, no `GROUP BY`, and no table scans.
 2. **Minimal Data Payload:** It computes only `date_trunc('hour', NEW.created_at AT TIME ZONE 'Asia/Kolkata')` and appends a single 32-byte tuple into `outbox`.
 3. **Optimized B-tree Indexing:** The partial index `idx_outbox_claim` indexes only `status IN ('pending', 'claimed')`, keeping index maintenance costs negligible.
+
