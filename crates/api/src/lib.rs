@@ -1,1 +1,48 @@
+use axum::{
+    http::{header, HeaderValue},
+    middleware::{self, Next},
+    response::Response,
+    routing::get,
+    Json, Router,
+};
+use serde_json::json;
+use sqlx::PgPool;
+
+pub mod auth;
+pub mod routes;
 pub mod self_check;
+
+pub use auth::{hash_api_key, AuthenticatedTenant};
+
+/// Anti-leak cache defense (INC-02 prevention):
+/// Strictly forces every downstream client, CDN, and intermediate proxy to never store or cache responses.
+pub async fn zero_cache_middleware(req: axum::extract::Request, next: Next) -> Response {
+    let mut res = next.run(req).await;
+    let headers = res.headers_mut();
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("no-store, no-cache, must-revalidate, proxy-revalidate"),
+    );
+    headers.insert(header::PRAGMA, HeaderValue::from_static("no-cache"));
+    headers.insert(header::EXPIRES, HeaderValue::from_static("0"));
+    res
+}
+
+async fn health_check() -> Json<serde_json::Value> {
+    Json(json!({ "status": "healthy", "service": "analytics-api" }))
+}
+
+pub fn create_app(pool: PgPool) -> Router {
+    let api_routes = Router::new()
+        .route("/tenants/:id/orders/count", get(routes::get_order_count))
+        .route("/tenants/:id/orders/trend", get(routes::get_order_trend))
+        .route("/tenants/:id/products/top", get(routes::get_top_products))
+        .route("/tenants/:id/orders/breakdown", get(routes::get_order_breakdown))
+        .layer(middleware::from_fn_with_state(pool.clone(), auth::auth_middleware));
+
+    Router::new()
+        .route("/health", get(health_check))
+        .merge(api_routes)
+        .layer(middleware::from_fn(zero_cache_middleware))
+        .with_state(pool)
+}

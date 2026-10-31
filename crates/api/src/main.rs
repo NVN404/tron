@@ -1,13 +1,7 @@
-use api::self_check::SecuritySelfCheck;
-use axum::{routing::get, Json, Router};
+use api::{create_app, self_check::SecuritySelfCheck};
 use common::{init_telemetry, AppConfig};
-use serde_json::json;
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
-
-async fn health_check() -> Json<serde_json::Value> {
-    Json(json!({ "status": "healthy", "service": "analytics-api" }))
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -24,7 +18,7 @@ async fn main() -> anyhow::Result<()> {
     // Execute security self-check before binding HTTP listener
     SecuritySelfCheck::run(&pool).await?;
 
-    let app = Router::new().route("/health", get(health_check));
+    let app = create_app(pool);
 
     let addr = format!("{}:{}", config.api_host, config.api_port);
     info!("Starting Analytics API on {}", addr);
