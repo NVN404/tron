@@ -38,6 +38,15 @@ enum Commands {
         #[arg(long)]
         to: Option<String>,
     },
+    /// Reconcile and self-heal drift against source
+    Reconcile {
+        #[arg(long)]
+        tenant: Uuid,
+        #[arg(long)]
+        from: Option<String>,
+        #[arg(long)]
+        to: Option<String>,
+    },
 }
 
 #[tokio::main]
@@ -97,6 +106,19 @@ async fn main() -> Result<()> {
                 .unwrap_or_else(|| Utc::now() + Duration::days(1));
 
             backfiller.rebuild(tenant, from_dt, to_dt).await?;
+        }
+        Commands::Reconcile { tenant, from, to } => {
+            let reconciler = worker::Reconciler::new(source_pool, analytics_pool);
+            let from_dt = from
+                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
+                .unwrap_or_else(|| Utc::now() - Duration::days(7));
+            let to_dt = to
+                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
+                .unwrap_or_else(Utc::now);
+
+            info!("Starting reconciliation for tenant {} in [{}, {})...", tenant, from_dt, to_dt);
+            let drifts = reconciler.reconcile_window(tenant, from_dt, to_dt).await?;
+            info!("Reconciliation finished. Detected and repaired {} drifted buckets.", drifts.len());
         }
     }
 
