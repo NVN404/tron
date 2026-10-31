@@ -1,0 +1,68 @@
+services:
+  source_db:
+    image: postgres:16-alpine
+    container_name: mitigata_source_db
+    environment:
+      POSTGRES_DB: source_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - source_pg_data:/var/lib/postgresql/data
+      - ./infra/init-source.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c work_mem=16MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=200
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c timezone=Asia/Kolkata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d source_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+
+  analytics_db:
+    image: postgres:16-alpine
+    container_name: mitigata_analytics_db
+    environment:
+      POSTGRES_DB: analytics_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - analytics_pg_data:/var/lib/postgresql/data
+      - ./infra/init-analytics.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: >
+      postgres
+      -c shared_buffers=512MB
+      -c work_mem=64MB
+      -c maintenance_work_mem=128MB
+      -c max_connections=200
+      -c timezone=Asia/Kolkata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d analytics_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+
+volumes:
+  source_pg_data:
+  analytics_pg_data:

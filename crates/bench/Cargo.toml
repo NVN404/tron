@@ -1,0 +1,19 @@
+[package]
+name = "bench"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+common = { workspace = true }
+oracle = { workspace = true }
+tokio = { workspace = true }
+sqlx = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+reqwest = { version = "0.12", features = ["json"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }

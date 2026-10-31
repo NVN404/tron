@@ -1,0 +1,15 @@
+[package]
+name = "worker"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+common = { workspace = true }
+tokio = { workspace = true }
+sqlx = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
