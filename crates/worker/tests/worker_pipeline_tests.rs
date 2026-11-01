@@ -47,10 +47,32 @@ async fn test_heterogeneous_capture_and_worker_pipeline() {
     let mongo_adapter = MongoAdapter::new(mongo_cfg.clone()).await.unwrap();
     mongo_adapter.setup_schema().await.unwrap();
 
-    // Drain any existing outbox records so this test captures only newly generated events
-    let pre_capture = CaptureEngine::from_config(&config, store.clone()).await.unwrap();
-    let _ = pre_capture.run_once("pg_source_1").await;
-    let _ = pre_capture.run_once("mysql_source").await;
+    // Advance source_cursors to current max outbox id so this test isolates newly generated events
+    let pg_max: Option<i64> = sqlx::query_scalar("SELECT MAX(id) FROM _orders_outbox")
+        .fetch_optional(pg_adapter.pool())
+        .await
+        .unwrap()
+        .flatten();
+    if let Some(max_id) = pg_max {
+        sqlx::query("INSERT INTO source_cursors (source_id, cursor_value, updated_at) VALUES ('pg_source_1', $1, NOW()) ON CONFLICT (source_id) DO UPDATE SET cursor_value = $1;")
+            .bind(max_id.to_string())
+            .execute(&pool)
+            .await
+            .unwrap();
+    }
+
+    let mysql_max: Option<i64> = sqlx::query_scalar("SELECT MAX(id) FROM _sales_outbox")
+        .fetch_optional(mysql_adapter.pool())
+        .await
+        .unwrap()
+        .flatten();
+    if let Some(max_id) = mysql_max {
+        sqlx::query("INSERT INTO source_cursors (source_id, cursor_value, updated_at) VALUES ('mysql_source', $1, NOW()) ON CONFLICT (source_id) DO UPDATE SET cursor_value = $1;")
+            .bind(max_id.to_string())
+            .execute(&pool)
+            .await
+            .unwrap();
+    }
 
     // 2. Insert records into each heterogeneous source
     let hour = Utc.with_ymd_and_hms(2026, 11, 1, 18, 0, 0).unwrap();

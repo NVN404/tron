@@ -80,10 +80,16 @@
       <div class="md:col-span-5">
         <label class="block text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-2">Active Merchant Store</label>
         <select id="tenantSelect" onchange="onTenantChange()" class="w-full bg-[#070b14] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
-          <optgroup label="Real Commercial Stores (Olist Brazilian E-Commerce)">
-            <option value="6560211a19b47992c3666cc44a7e94c0" data-token="token-olist-6560211a" selected>Olist Store 6560211a — Watches &amp; Gifts (2,033 Real Items)</option>
+          <optgroup label="1 Million Real Records (UCI / Kaggle Online Retail II)">
+            <option value="00000000-0000-0044-0000-000000000001" data-token="token-retail-uk" selected>UK Online Retail Flagship (977,026 Real Orders, ₹18.6 Cr)</option>
+            <option value="00000000-0000-0044-0000-000000000002" data-token="token-retail-ie">EIRE Ireland Retail (18,485 Real Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000003" data-token="token-retail-de">Germany Direct Retail (17,466 Real Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000004" data-token="token-retail-fr">France Boutique Retail (14,142 Real Orders)</option>
           </optgroup>
-          <optgroup label="High-Volume Demo Merchants">
+          <optgroup label="Real Commercial Stores (Olist Brazilian E-Commerce)">
+            <option value="6560211a19b47992c3666cc44a7e94c0" data-token="token-olist-6560211a">Olist Store 6560211a — Watches &amp; Gifts (2,033 Real Items)</option>
+          </optgroup>
+          <optgroup label="High-Volume Multi-Tenant Stores">
             <option value="00000000-0000-0003-0000-000000000001" data-token="token-tenant-3">Tech Electronics Store (289k Orders, ₹1.39 Cr)</option>
             <option value="00000000-0000-0001-0000-000000000001" data-token="token-tenant-1">Flagship Retail Store (750k Orders, ₹3.56 Cr)</option>
             <option value="00000000-0000-0002-0000-000000000001" data-token="token-tenant-2">Global Goods Store (404k Orders, ₹1.93 Cr)</option>
@@ -100,7 +106,7 @@
       <div class="md:col-span-4">
         <label class="block text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-2">Bearer Token (Authenticated Context)</label>
         <div class="relative">
-          <input type="text" id="tokenInput" value="token-olist-6560211a" class="w-full bg-[#070b14] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm font-mono text-cyan-400 focus:outline-none focus:border-cyan-500 transition-colors" />
+          <input type="text" id="tokenInput" value="token-retail-uk" class="w-full bg-[#070b14] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm font-mono text-cyan-400 focus:outline-none focus:border-cyan-500 transition-colors" />
           <span class="absolute right-3 top-2.5 text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300">SHA-256</span>
         </div>
       </div>

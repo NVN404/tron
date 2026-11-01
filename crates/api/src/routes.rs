@@ -105,37 +105,60 @@ fn parse_flexible_date(s: &str) -> Option<DateTime<Utc>> {
     None
 }
 
-fn resolve_window(from: Option<&str>, to: Option<&str>, preset: Option<&str>) -> (DateTime<Utc>, DateTime<Utc>) {
+fn resolve_window(
+    from: Option<&str>,
+    to: Option<&str>,
+    preset: Option<&str>,
+) -> Result<(DateTime<Utc>, DateTime<Utc>), (StatusCode, Json<serde_json::Value>)> {
     let now = Utc::now();
 
     if let Some(p) = preset {
         match p.to_lowercase().as_str() {
             "today" => {
                 let today_start = Utc.timestamp_opt((now.timestamp() / 86400) * 86400, 0).unwrap();
-                return (today_start, now + Duration::hours(1));
+                return Ok((today_start, now + Duration::hours(1)));
             }
             "last_7_days" | "7d" | "this_week" => {
                 let start = now - Duration::days(7);
                 let start_aligned = Utc.timestamp_opt((start.timestamp() / 3600) * 3600, 0).unwrap();
-                return (start_aligned, now + Duration::hours(1));
+                return Ok((start_aligned, now + Duration::hours(1)));
             }
             "last_30_days" | "30d" | "this_month" => {
                 let start = now - Duration::days(30);
                 let start_aligned = Utc.timestamp_opt((start.timestamp() / 3600) * 3600, 0).unwrap();
-                return (start_aligned, now + Duration::hours(1));
+                return Ok((start_aligned, now + Duration::hours(1)));
             }
             _ => {}
         }
     }
 
-    let to_dt = to.and_then(parse_flexible_date).unwrap_or_else(|| now + Duration::hours(1));
-    let from_dt = from.and_then(parse_flexible_date).unwrap_or_else(|| now - Duration::days(3650));
+    let to_dt = if let Some(t_str) = to {
+        parse_flexible_date(t_str).ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({ "error": format!("Invalid 'to' timestamp format: {}", t_str) })),
+            )
+        })?
+    } else {
+        now + Duration::hours(1)
+    };
+
+    let from_dt = if let Some(f_str) = from {
+        parse_flexible_date(f_str).ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({ "error": format!("Invalid 'from' timestamp format: {}", f_str) })),
+            )
+        })?
+    } else {
+        Utc.with_ymd_and_hms(2000, 1, 1, 0, 0, 0).unwrap()
+    };
 
     // Align to UTC hour boundary
     let from_aligned = Utc.timestamp_opt((from_dt.timestamp() / 3600) * 3600, 0).unwrap();
     let to_aligned = Utc.timestamp_opt((to_dt.timestamp() / 3600) * 3600, 0).unwrap();
 
-    (from_aligned, to_aligned)
+    Ok((from_aligned, to_aligned))
 }
 
 fn derive_product_category(product_id: &str) -> &'static str {
@@ -173,7 +196,7 @@ pub async fn get_order_count(
         )
     })?;
 
-    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref());
+    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref())?;
 
     let mut tx = pool.begin().await.map_err(internal_error)?;
 
@@ -241,7 +264,7 @@ pub async fn get_order_trend(
         )
     })?;
 
-    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref());
+    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref())?;
     let grain = params.grain.unwrap_or_else(|| "day".to_string()).to_lowercase();
 
     let mut tx = pool.begin().await.map_err(internal_error)?;
@@ -357,7 +380,7 @@ pub async fn get_top_products(
         )
     })?;
 
-    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref());
+    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref())?;
     let n = params.n.unwrap_or(10).clamp(1, 100);
 
     let mut tx = pool.begin().await.map_err(internal_error)?;
@@ -442,7 +465,7 @@ pub async fn get_order_breakdown(
         )
     })?;
 
-    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref());
+    let (from_aligned, to_aligned) = resolve_window(params.from.as_deref(), params.to.as_deref(), params.preset.as_deref())?;
 
     let mut tx = pool.begin().await.map_err(internal_error)?;
 

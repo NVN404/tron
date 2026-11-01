@@ -30,10 +30,17 @@ async fn test_mysql_outbox_capture_and_recompute() {
     // 1. Setup schema & triggers
     adapter.setup_schema().await.unwrap();
 
+    let cursor: Option<i64> = sqlx::query_scalar(&format!("SELECT MAX(id) FROM _{}_outbox", config.mapping.entity))
+        .fetch_optional(adapter.pool())
+        .await
+        .unwrap()
+        .flatten();
+    let cursor_str = cursor.map(|c| c.to_string());
+
     let tenant_id = format!("mysql_ten_{}", Uuid::new_v4().simple());
+    let sale_id = format!("sale_{}", Uuid::new_v4().simple());
     let hour = Utc.with_ymd_and_hms(2026, 11, 1, 15, 0, 0).unwrap();
     let created_at = (hour + Duration::minutes(20)).naive_utc();
-    let sale_id = format!("sale_{}", Uuid::new_v4().simple());
 
     // 2. Insert order directly into MySQL source table
     let entity = config.mapping.entity.as_str();
@@ -52,8 +59,8 @@ async fn test_mysql_outbox_capture_and_recompute() {
         .await
         .unwrap();
 
-    // 3. Poll outbox
-    let batch = adapter.poll(None).await.unwrap();
+    // 3. Poll outbox from recent cursor
+    let batch = adapter.poll(cursor_str).await.unwrap();
     assert!(!batch.bucket_keys.is_empty());
     let expected_key = BucketKey::new(&config.id, &tenant_id, hour);
     assert!(

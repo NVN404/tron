@@ -8,6 +8,13 @@ TRON solves the dual challenges of **analytical query performance** (sub-5ms p99
 
 ## Architecture Overview
 
+<p align="center">
+  <img src="docs/assets/architecture_flowchart.png" alt="TRON 6-Tier Architecture Overview" width="85%" />
+</p>
+
+<details>
+<summary><b>Click to expand Mermaid Architecture Definition</b></summary>
+
 ```mermaid
 flowchart TB
     subgraph SOURCE["1. SOURCE DATABASES"]
@@ -64,6 +71,8 @@ flowchart TB
     ENGINE -.-> OBS
     API -.-> OBS
 ```
+
+</details>
 
 ### End-to-End Execution Sequence
 

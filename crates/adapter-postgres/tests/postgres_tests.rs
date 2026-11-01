@@ -30,6 +30,13 @@ async fn test_postgres_outbox_capture_and_recompute() {
     // 1. Setup schema & triggers
     adapter.setup_schema().await.unwrap();
 
+    let cursor: Option<i64> = sqlx::query_scalar(&format!("SELECT MAX(id) FROM _{}_outbox", config.mapping.entity))
+        .fetch_optional(adapter.pool())
+        .await
+        .unwrap()
+        .flatten();
+    let cursor_str = cursor.map(|c| c.to_string());
+
     let tenant_id = format!("tenant_{}", Uuid::new_v4().simple());
     let hour = Utc.with_ymd_and_hms(2026, 11, 1, 14, 0, 0).unwrap();
     let created_at = hour + Duration::minutes(15);
@@ -53,7 +60,7 @@ async fn test_postgres_outbox_capture_and_recompute() {
         .unwrap();
 
     // 3. Poll outbox
-    let batch = adapter.poll(None).await.unwrap();
+    let batch = adapter.poll(cursor_str).await.unwrap();
     assert!(!batch.bucket_keys.is_empty());
     let expected_key = BucketKey::new(&config.id, &tenant_id, hour);
     assert!(
