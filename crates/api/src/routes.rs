@@ -74,6 +74,7 @@ pub struct TrendQuery {
     pub to: Option<String>,
     pub preset: Option<String>,
     pub grain: Option<String>,
+    pub status: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -283,6 +284,8 @@ pub async fn get_order_trend(
     .await
     .map_err(internal_error)?;
 
+    let status_filter = params.status.as_deref().unwrap_or("completed").to_lowercase();
+
     let points: Vec<serde_json::Value> = match grain.as_str() {
         "hour" => {
             let rows: Vec<(DateTime<Utc>, i64, i64)> = sqlx::query_as(
@@ -292,7 +295,7 @@ pub async fn get_order_trend(
                     COALESCE(SUM(order_count), 0)::BIGINT,
                     COALESCE(SUM(total_amount_minor), 0)::BIGINT
                 FROM agg_hourly_status
-                WHERE tenant_uuid = $1 AND hour >= $2 AND hour < $3 AND status = 'completed'
+                WHERE tenant_uuid = $1 AND hour >= $2 AND hour < $3 AND ($4 = 'all' OR status = $4)
                 GROUP BY hour
                 ORDER BY hour ASC
                 "#,
@@ -300,6 +303,7 @@ pub async fn get_order_trend(
             .bind(tenant_id)
             .bind(from_aligned)
             .bind(to_aligned)
+            .bind(&status_filter)
             .fetch_all(&mut *tx)
             .await
             .map_err(internal_error)?;
@@ -323,7 +327,7 @@ pub async fn get_order_trend(
                     COALESCE(SUM(order_count), 0)::BIGINT,
                     COALESCE(SUM(total_amount_minor), 0)::BIGINT
                 FROM agg_hourly_status
-                WHERE tenant_uuid = $1 AND hour >= $2 AND hour < $3 AND status = 'completed'
+                WHERE tenant_uuid = $1 AND hour >= $2 AND hour < $3 AND ($4 = 'all' OR status = $4)
                 GROUP BY 1
                 ORDER BY 1 ASC
                 "#,
@@ -331,6 +335,7 @@ pub async fn get_order_trend(
             .bind(tenant_id)
             .bind(from_aligned)
             .bind(to_aligned)
+            .bind(&status_filter)
             .fetch_all(&mut *tx)
             .await
             .map_err(internal_error)?;

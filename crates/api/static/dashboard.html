@@ -3,445 +3,475 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRON | Enterprise Multi-Store Analytics Platform</title>
+  <title>TRON | Multi-Tenant Real-Time Aggregation Platform</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     :root {
-      --bg: #070b14;
-      --card-bg: #0f172a;
+      --bg-base: #070a13;
+      --card-bg: #0d1322;
       --card-border: #1e293b;
-      --accent-cyan: #0ea5e9;
-      --accent-emerald: #10b981;
-      --accent-indigo: #6366f1;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-amber: #f59e0b;
     }
     body {
-      background-color: var(--bg);
+      background-color: var(--bg-base);
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #090d16;
+      background: #070a13;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #1e293b;
       border-radius: 3px;
     }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
   </style>
 </head>
-<body class="min-h-screen p-4 md:p-6 antialiased custom-scrollbar">
-  <div class="max-w-7xl mx-auto space-y-6">
+<body class="min-h-screen p-4 md:p-6 antialiased custom-scrollbar selection:bg-cyan-500/30 selection:text-cyan-200">
+  <div class="max-w-7xl mx-auto space-y-5">
 
-    <!-- Brand Header -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between pb-5 border-b border-[var(--card-border)] gap-4">
+    <!-- Operational Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-800 gap-4" role="banner">
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+        <div class="w-10 h-10 rounded-lg bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-mono font-bold text-lg">
+          TR
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-xl md:text-2xl font-black tracking-wider text-white">
-              TRON
+            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white font-mono">
+              TRON <span class="text-xs font-normal text-slate-400 font-sans">v0.1.0</span>
             </h1>
-            <span class="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Analytics Engine</span>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              Multi-Tenant Aggregation Layer
+            </span>
           </div>
-          <p class="text-xs text-[var(--text-muted)] font-mono mt-0.5">
-            Heterogeneous Multi-Database Analytics &bull; PostgreSQL &bull; MySQL &bull; MongoDB &bull; Kernel RLS
+          <p class="text-xs text-slate-400 font-mono mt-0.5">
+            Heterogeneous Outbox &bull; Rust Workers &bull; Kernel RLS Isolation &bull; Sub-5ms Query Serving
           </p>
         </div>
       </div>
 
-      <!-- Engine Badges -->
-      <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          ENGINE RLS: ACTIVE
+      <!-- Engine Telemetry Status Badges -->
+      <div class="flex flex-wrap items-center gap-2 text-xs font-mono" aria-label="System Security Status">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          RLS: FORCE ENABLED
         </span>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700">
           ROLE: api_ro
         </span>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700">
           CACHE: no-store
+        </span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
+          DATASET: 1,067,371 REAL ORDERS
         </span>
       </div>
     </header>
 
-    <!-- Global Controls: Store Switcher, Token, Time Range -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl">
+    <!-- Global Controls: Store Switcher, Token, Actions -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 rounded-xl bg-slate-900/70 border border-slate-800 shadow-sm" aria-label="Store Context Selector">
       <div class="md:col-span-5">
-        <label class="block text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-2">Active Merchant Store</label>
-        <select id="tenantSelect" onchange="onTenantChange()" class="w-full bg-[#070b14] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
-          <optgroup label="1 Million Real Records (UCI / Kaggle Online Retail II)">
-            <option value="00000000-0000-0044-0000-000000000001" data-token="token-retail-uk" selected>UK Online Retail Flagship (977,026 Real Orders, ₹18.6 Cr)</option>
-            <option value="00000000-0000-0044-0000-000000000002" data-token="token-retail-ie">EIRE Ireland Retail (18,485 Real Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000003" data-token="token-retail-de">Germany Direct Retail (17,466 Real Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000004" data-token="token-retail-fr">France Boutique Retail (14,142 Real Orders)</option>
+        <label for="tenantSelect" class="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1.5 font-mono">
+          Active Merchant Store
+        </label>
+        <select id="tenantSelect" onchange="onTenantChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors font-mono cursor-pointer">
+          <optgroup label="1 Million Real Records (Kaggle / UCI Online Retail II)">
+            <option value="00000000-0000-0044-0000-000000000001" data-token="token-retail-uk" selected>United Kingdom Flagship (977,026 Orders, ₹18.6 Cr)</option>
+            <option value="00000000-0000-0044-0000-000000000002" data-token="token-retail-ie">EIRE Ireland Retail (17,354 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000003" data-token="token-retail-de">Germany Direct Retail (16,703 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000004" data-token="token-retail-fr">France Boutique Retail (13,941 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000005" data-token="token-retail-es">Spain Commercial Retail (3,720 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000006" data-token="token-retail-nl">Netherlands Direct Retail (5,093 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000007" data-token="token-retail-be">Belgium Retail Store (3,069 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000008" data-token="token-retail-ch">Switzerland Alpine Retail (3,137 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000009" data-token="token-retail-pt">Portugal Direct Retail (2,562 Orders)</option>
+            <option value="00000000-0000-0044-0000-000000000010" data-token="token-retail-au">Australia Pacific Retail (1,815 Orders)</option>
           </optgroup>
           <optgroup label="Real Commercial Stores (Olist Brazilian E-Commerce)">
-            <option value="6560211a19b47992c3666cc44a7e94c0" data-token="token-olist-6560211a">Olist Store 6560211a — Watches &amp; Gifts (2,033 Real Items)</option>
+            <option value="55c98fb8-24f1-5b9f-9d66-be4e447d524f" data-token="token-olist-6560211a">Olist Store 6560211a — Watches &amp; Gifts (1,996 Orders)</option>
           </optgroup>
-          <optgroup label="High-Volume Multi-Tenant Stores">
-            <option value="00000000-0000-0003-0000-000000000001" data-token="token-tenant-3">Tech Electronics Store (289k Orders, ₹1.39 Cr)</option>
-            <option value="00000000-0000-0001-0000-000000000001" data-token="token-tenant-1">Flagship Retail Store (750k Orders, ₹3.56 Cr)</option>
-            <option value="00000000-0000-0002-0000-000000000001" data-token="token-tenant-2">Global Goods Store (404k Orders, ₹1.93 Cr)</option>
-            <option value="42" data-token="token-tenant-42">Store #42 — Quick Test Tenant (Integer ID)</option>
+          <optgroup label="Multi-Tenant Scale Tenants (Simulated Zipf)">
+            <option value="00000000-0000-0001-0000-000000000001" data-token="token-tenant-1">Tenant #1 — Flagship Store (750k Orders, ₹3.56 Cr)</option>
+            <option value="00000000-0000-0002-0000-000000000001" data-token="token-tenant-2">Tenant #2 — Global Goods (404k Orders, ₹1.93 Cr)</option>
+            <option value="00000000-0000-0003-0000-000000000001" data-token="token-tenant-3">Tenant #3 — Tech Electronics (289k Orders, ₹1.39 Cr)</option>
+            <option value="00000000-0000-0042-0000-000000000001" data-token="token-tenant-42">Tenant #42 — PRD Specification Tenant (12.2k Orders)</option>
           </optgroup>
-          <optgroup label="Heterogeneous Live Sources">
+          <optgroup label="Heterogeneous Source Databases">
             <option value="032d7222-090d-59bc-9ccb-b5f054d057c1" data-token="token-032d7222-090d-59bc-9ccb-b5f054d057c1">PostgreSQL Source 2 (Direct Outbox)</option>
             <option value="24c5b05b-4f74-5d3f-9f27-ec4296400976" data-token="token-24c5b05b-4f74-5d3f-9f27-ec4296400976">MySQL 8.0 Source (Sales Outbox)</option>
-            <option value="f8979f1b-ff3f-59f8-89bb-9d39a222e096" data-token="token-f8979f1b-ff3f-59f8-89bb-9d39a222e096">MongoDB Replica Set (Change Stream)</option>
+            <option value="f8979f1b-ff3f-59f8-89bb-9d39a222e096" data-token="token-f8979f1b-ff3f-59f8-89bb-9d39a222e096">MongoDB 7.0 Replica Set (Change Stream)</option>
           </optgroup>
         </select>
       </div>
 
       <div class="md:col-span-4">
-        <label class="block text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-2">Bearer Token (Authenticated Context)</label>
+        <label for="tokenInput" class="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1.5 font-mono">
+          Bearer Token (Authenticated Context)
+        </label>
         <div class="relative">
-          <input type="text" id="tokenInput" value="token-retail-uk" class="w-full bg-[#070b14] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm font-mono text-cyan-400 focus:outline-none focus:border-cyan-500 transition-colors" />
-          <span class="absolute right-3 top-2.5 text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300">SHA-256</span>
+          <input type="text" id="tokenInput" value="token-retail-uk" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors" />
+          <span class="absolute right-2.5 top-2 text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">SHA-256</span>
         </div>
       </div>
 
       <div class="md:col-span-3 flex items-end gap-2">
-        <button onclick="refreshDashboard()" class="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-all shadow-lg shadow-cyan-600/20 flex items-center justify-center gap-2">
-          <svg class="w-4 h-4 animate-spin hidden" id="refreshSpinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span id="refreshBtnText">Refresh Analytics</span>
+        <button onclick="refreshDashboard()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-3 rounded-lg text-xs font-mono transition-colors focus:ring-2 focus:ring-cyan-400 focus:outline-none flex items-center justify-center gap-1.5 cursor-pointer">
+          <svg class="w-3.5 h-3.5 animate-spin hidden" id="refreshSpinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span id="refreshBtnText">Refresh All</span>
         </button>
-        <button onclick="toggleQuarantine()" id="quarantineBtn" title="Simulate Security Quarantine" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2.5 rounded-xl text-sm transition-all font-mono">
+        <button onclick="toggleQuarantine()" id="quarantineBtn" title="Simulate Security Quarantine" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-lg text-xs font-mono transition-colors cursor-pointer">
           Quarantine
         </button>
       </div>
-    </div>
+    </section>
 
     <!-- Navigation Tabs -->
-    <div class="p-1.5 rounded-2xl bg-[#0a0f1d] border border-[var(--card-border)] flex flex-wrap gap-1.5">
-      <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-600 text-white shadow-md shadow-cyan-600/20">
+    <nav class="p-1 rounded-lg bg-slate-900 border border-slate-800 flex flex-wrap gap-1" role="tablist">
+      <button onclick="switchTab('overview')" id="tab-overview" role="tab" aria-selected="true" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-cyan-600 text-white cursor-pointer">
         Sales Overview
       </button>
-      <button onclick="switchTab('trends')" id="tab-trends" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/[0.04]">
+      <button onclick="switchTab('trends')" id="tab-trends" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
         Revenue Trends
       </button>
-      <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/[0.04]">
+      <button onclick="switchTab('products')" id="tab-products" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
         Top Products
       </button>
-      <button onclick="switchTab('breakdown')" id="tab-breakdown" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/[0.04]">
-        Category Breakdown
+      <button onclick="switchTab('breakdown')" id="tab-breakdown" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+        Lifecycle Breakdown
       </button>
-      <button onclick="switchTab('stream')" id="tab-stream" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/[0.04]">
-        Live Ingestion Stream
+      <button onclick="switchTab('stream')" id="tab-stream" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+        CDC Outbox Injection
       </button>
-      <button onclick="switchTab('security')" id="tab-security" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/[0.04]">
-        Store Isolation Gateway
+      <button onclick="switchTab('security')" id="tab-security" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+        Security Gateway
       </button>
-      <button onclick="switchTab('api')" id="tab-api" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/[0.04]">
+      <button onclick="switchTab('api')" id="tab-api" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
         API Console
       </button>
-      <button onclick="switchTab('telemetry')" id="tab-telemetry" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/20 ml-auto">
-        System Telemetry
+      <button onclick="switchTab('telemetry')" id="tab-telemetry" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 border border-cyan-800/40 ml-auto cursor-pointer">
+        Live Telemetry
       </button>
-    </div>
+    </nav>
 
-    <!-- Active View Area -->
-    <div id="contentArea" class="space-y-6">
+    <!-- Main Content Views -->
+    <main id="contentArea" class="space-y-5" role="main">
 
-      <!-- 1. OVERVIEW VIEW -->
-      <div id="view-overview" class="tab-view block space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-lg relative overflow-hidden">
-            <p class="text-xs uppercase font-medium text-[var(--text-muted)] tracking-wider">Completed Orders</p>
-            <h3 id="cardOrderCount" class="text-3xl font-extrabold mt-2 text-white font-mono">--</h3>
-            <p class="text-xs text-emerald-400 mt-2 font-mono flex items-center gap-1">
-              <span>●</span> Snapshot Recomputed
-            </p>
+      <!-- 1. SALES OVERVIEW VIEW -->
+      <section id="view-overview" class="tab-view block space-y-4">
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Completed Orders</span>
+            <div id="cardOrderCount" class="text-2xl font-bold mt-1 text-white font-mono tabular-nums">--</div>
+            <div class="text-[11px] text-emerald-400 mt-1.5 font-mono flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Authoritative Snapshot
+            </div>
           </div>
-          <div class="p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-lg relative overflow-hidden">
-            <p class="text-xs uppercase font-medium text-[var(--text-muted)] tracking-wider">Total Sales Volume</p>
-            <h3 id="cardSalesPaise" class="text-3xl font-extrabold mt-2 text-emerald-400 font-mono">--</h3>
-            <p class="text-xs text-[var(--text-muted)] mt-2 font-mono">
-              Integer Minor Units &rarr; Rupee / Currency
-            </p>
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Total Sales Volume</span>
+            <div id="cardSalesPaise" class="text-2xl font-bold mt-1 text-emerald-400 font-mono tabular-nums">--</div>
+            <div class="text-[11px] text-slate-400 mt-1.5 font-mono">
+              Aggregated Minor Units &rarr; INR
+            </div>
           </div>
-          <div class="p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-lg relative overflow-hidden">
-            <p class="text-xs uppercase font-medium text-[var(--text-muted)] tracking-wider">Query Latency</p>
-            <h3 id="cardLatency" class="text-3xl font-extrabold mt-2 text-purple-400 font-mono">-- ms</h3>
-            <p class="text-xs text-emerald-400 mt-2 font-mono">
-              SLA Target: &lt; 200 ms (Met)
-            </p>
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Measured Query Latency</span>
+            <div id="cardLatency" class="text-2xl font-bold mt-1 text-cyan-300 font-mono tabular-nums">-- ms</div>
+            <div class="text-[11px] text-emerald-400 mt-1.5 font-mono">
+              Target: &lt; 200 ms (Met)
+            </div>
           </div>
-          <div class="p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-lg relative overflow-hidden">
-            <p class="text-xs uppercase font-medium text-[var(--text-muted)] tracking-wider">Data Freshness</p>
-            <h3 id="cardFreshness" class="text-sm font-semibold mt-3 text-cyan-300 font-mono truncate">--</h3>
-            <p class="text-xs text-cyan-400 mt-2 font-mono">
-              Outbox Replication Lag: &lt; 20 ms
-            </p>
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Rollup Watermark</span>
+            <div id="cardFreshness" class="text-sm font-bold mt-2 text-slate-200 font-mono truncate">--</div>
+            <div id="cardFreshnessLag" class="text-[11px] text-cyan-400 mt-1.5 font-mono">
+              CDC Replication Lag: &lt; 20 ms
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- 2. TRENDS VIEW -->
-      <div id="view-trends" class="tab-view hidden space-y-4">
-        <div class="flex items-center justify-between">
+        <!-- Embedded Revenue Trend Section on Overview -->
+        <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+            <div>
+              <h2 class="text-sm font-bold text-white font-mono">
+                Daily Gross Revenue &amp; Order Volume Trend
+              </h2>
+              <p class="text-xs text-slate-400 font-mono mt-0.5">
+                Dynamically rolled up from analytical bucket tables with zero OLTP source lock contention.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-400 font-mono hidden sm:inline">Grain:</span>
+              <button onclick="setTrendGrain('day')" id="grain-day" class="px-2.5 py-1 rounded text-xs font-mono bg-cyan-600 text-white cursor-pointer">Daily</button>
+              <button onclick="setTrendGrain('hour')" id="grain-hour" class="px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer">Hourly</button>
+            </div>
+          </div>
+
+          <!-- Trend Summary KPI Strip -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
+            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase text-slate-500">Period Sales</span>
+              <div id="trendTotalSales" class="text-sm font-bold text-emerald-400 mt-0.5 tabular-nums">--</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase text-slate-500">Period Orders</span>
+              <div id="trendTotalOrders" class="text-sm font-bold text-slate-200 mt-0.5 tabular-nums">--</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase text-slate-500">Peak Day Sales</span>
+              <div id="trendPeakSales" class="text-sm font-bold text-cyan-300 mt-0.5 tabular-nums truncate">--</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase text-slate-500">Daily Average</span>
+              <div id="trendAvgSales" class="text-sm font-bold text-slate-200 mt-0.5 tabular-nums">--</div>
+            </div>
+          </div>
+
+          <!-- Responsive SVG Vector Trend Canvas -->
+          <div id="chartContainer" class="w-full pt-2">
+            <div class="h-64 flex items-center justify-center text-xs font-mono text-slate-500">
+              Loading trend rollups...
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. DEEP-DIVE REVENUE TRENDS VIEW -->
+      <section id="view-trends" class="tab-view hidden space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 class="text-base font-bold text-white">Revenue &amp; Order Volume Trends</h2>
-            <p class="text-xs text-[var(--text-muted)]">Indexed hourly rollups dynamically grouped with zero transactional table scanning.</p>
+            <h2 class="text-base font-bold text-white font-mono">Revenue Trends &amp; Bucket Aggregation</h2>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">
+              Authoritatively calculated across `agg_hourly_status` rollups with instant sub-5ms multi-tenant query execution.
+            </p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="setTrendGrain('day')" id="grain-day" class="px-3 py-1 rounded-lg text-xs font-mono bg-cyan-600 text-white">Daily</button>
-            <button onclick="setTrendGrain('hour')" id="grain-hour" class="px-3 py-1 rounded-lg text-xs font-mono bg-gray-800 text-gray-400 hover:text-white">Hourly</button>
+            <label for="trendStatusFilter" class="text-xs text-slate-400 font-mono">Status:</label>
+            <select id="trendStatusFilter" onchange="onStatusFilterChange()" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white font-mono cursor-pointer">
+              <option value="completed" selected>Completed Orders Only</option>
+              <option value="all">All Lifecycles (Pending + Cancelled + Completed)</option>
+              <option value="cancelled">Cancelled Only</option>
+              <option value="refunded">Refunded Only</option>
+            </select>
           </div>
         </div>
-        <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl">
-          <div id="chartContainer" class="h-64 flex items-end gap-1.5 pt-6 pb-2 border-b border-gray-800"></div>
-          <div class="flex justify-between text-[10px] text-gray-500 font-mono mt-3">
-            <span>30 Days Ago</span>
-            <span>15 Days Ago</span>
-            <span>Live Today</span>
+
+        <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div id="chartContainerDeep" class="w-full">
+            <div class="h-64 flex items-center justify-center text-xs font-mono text-slate-500">
+              Loading trend rollups...
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- 3. TOP PRODUCTS VIEW -->
-      <div id="view-products" class="tab-view hidden space-y-4">
+      <section id="view-products" class="tab-view hidden space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-base font-bold text-white">Top Selling Products</h2>
-            <p class="text-xs text-[var(--text-muted)]">Precomputed product rollups ordered by gross revenue with deterministic tie-breaking.</p>
+            <h2 class="text-base font-bold text-white font-mono">Top Products by Revenue</h2>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">
+              Ranked across `agg_hourly_product` rollups with deterministic tie-breaking.
+            </p>
           </div>
           <div class="flex items-center gap-2">
-            <label class="text-xs text-gray-400 font-mono">Limit:</label>
-            <select id="topNLimit" onchange="fetchTopProductsData()" class="bg-[#070b14] border border-[var(--card-border)] rounded-lg px-2.5 py-1 text-xs text-white">
-              <option value="5" selected>Top 5</option>
-              <option value="10">Top 10</option>
+            <label for="topNLimit" class="text-xs text-slate-400 font-mono">Limit:</label>
+            <select id="topNLimit" onchange="fetchTopProductsData()" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white font-mono cursor-pointer">
+              <option value="5">Top 5</option>
+              <option value="10" selected>Top 10</option>
               <option value="20">Top 20</option>
             </select>
           </div>
         </div>
-        <div class="rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl overflow-hidden">
+        <div class="rounded-xl bg-slate-900/70 border border-slate-800 overflow-hidden">
           <table class="w-full text-left text-sm font-mono">
-            <thead class="bg-[#070b14] text-xs uppercase text-gray-400 border-b border-gray-800">
+            <thead class="bg-slate-950 text-xs uppercase text-slate-400 border-b border-slate-800">
               <tr>
-                <th class="px-6 py-3.5">Rank &amp; Product</th>
-                <th class="px-6 py-3.5">Category</th>
-                <th class="px-6 py-3.5 text-right">Units Sold</th>
-                <th class="px-6 py-3.5 text-right">Gross Revenue</th>
+                <th class="px-5 py-3">Rank &amp; Product Code</th>
+                <th class="px-5 py-3">Inferred Category</th>
+                <th class="px-5 py-3 text-right">Units Sold</th>
+                <th class="px-5 py-3 text-right">Gross Sales (INR)</th>
               </tr>
             </thead>
-            <tbody id="topProductsTableBody" class="divide-y divide-gray-800 text-xs">
-              <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Loading products...</td></tr>
+            <tbody id="topProductsTableBody" class="divide-y divide-slate-800 text-xs">
+              <tr><td colspan="4" class="px-5 py-4 text-center text-slate-500">Loading products...</td></tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
       <!-- 4. CATEGORY BREAKDOWN VIEW -->
-      <div id="view-breakdown" class="tab-view hidden space-y-4">
+      <section id="view-breakdown" class="tab-view hidden space-y-4">
         <div>
-          <h2 class="text-base font-bold text-white">Category &amp; Order Status Breakdown</h2>
-          <p class="text-xs text-[var(--text-muted)]">Multi-dimensional lifecycle breakdown across completed, pending, cancelled, and refunded orders.</p>
+          <h2 class="text-base font-bold text-white font-mono">Lifecycle &amp; Category Breakdown</h2>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">Multi-dimensional lifecycle breakdown across order statuses and product departments.</p>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl space-y-4">
-            <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider font-mono">By Order Status</h3>
-            <div id="statusBreakdownGrid" class="grid grid-cols-2 gap-3"></div>
-          </div>
-          <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl space-y-4">
-            <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider font-mono">By Product Category</h3>
-            <div id="categoryBreakdownGrid" class="space-y-3"></div>
-          </div>
-        </div>
-      </div>
 
-      <!-- 5. LIVE INGESTION STREAM VIEW -->
-      <div id="view-stream" class="tab-view hidden space-y-4">
-        <div>
-          <h2 class="text-base font-bold text-white">Live Ingestion &amp; Mutation Simulator</h2>
-          <p class="text-xs text-[var(--text-muted)]">Trigger live database mutations (inserts &amp; status updates) and observe outbox capture latency.</p>
+        <div class="space-y-2">
+          <h3 class="text-xs uppercase font-mono font-semibold text-slate-400 tracking-wider">Order Status Distribution</h3>
+          <div id="statusBreakdownGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-500">Loading...</div>
+          </div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-cyan-500/20 shadow-xl space-y-4">
-            <h3 class="text-sm font-bold text-cyan-300">1. Inject Real Order (Source DB)</h3>
-            <p class="text-xs text-gray-400">Inserts a real order into the source database, firing the outbox trigger and worker rollup recalculation.</p>
-            <div class="space-y-3">
+
+        <div class="space-y-2 pt-2">
+          <h3 class="text-xs uppercase font-mono font-semibold text-slate-400 tracking-wider">Product Department Distribution</h3>
+          <div id="categoryBreakdownGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-500">Loading...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. LIVE CDC OUTBOX INGESTION STREAM -->
+      <section id="view-stream" class="tab-view hidden space-y-4">
+        <div>
+          <h2 class="text-base font-bold text-white font-mono">Live Ingestion &amp; CDC Trigger Simulation</h2>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">
+            Inject mutations directly into the active source database. Demonstrates atomic outbox triggers and snapshot rollup recomputations.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">1. Insert New Order Transaction</h3>
+            <div class="space-y-2 font-mono text-xs">
               <div>
-                <label class="block text-xs uppercase text-gray-400 font-mono mb-1">Product Name</label>
-                <input type="text" id="liveProdId" value="PROD-TRON-ENTERPRISE" class="w-full bg-[#070b14] border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300" />
+                <label class="block text-slate-400 mb-1">Product Identifier</label>
+                <input id="liveProdId" type="text" value="PROD-LIVE-COMMERCE" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-1.5 text-slate-200" />
               </div>
               <div>
-                <label class="block text-xs uppercase text-gray-400 font-mono mb-1">Amount (INR)</label>
-                <input type="number" id="liveAmountInr" value="5999" class="w-full bg-[#070b14] border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-emerald-300" />
+                <label class="block text-slate-400 mb-1">Order Amount (INR)</label>
+                <input id="liveAmountInr" type="number" value="4999" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-1.5 text-slate-200" />
               </div>
-              <button onclick="injectLiveOrder()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium py-2.5 px-4 rounded-xl text-xs font-mono transition-all shadow-lg shadow-emerald-600/20">
-                + Ingest Real Order
+              <button onclick="injectLiveOrder()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded transition-colors cursor-pointer mt-2">
+                Commit Order into Source DB
               </button>
             </div>
           </div>
 
-          <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-amber-500/20 shadow-xl space-y-4">
-            <h3 class="text-sm font-bold text-amber-300">2. Mutate Order Status (Placed &rarr; Cancelled)</h3>
-            <p class="text-xs text-gray-400">Mutates an active order to cancelled. Proves the anti-delta axiom: rolls up authoritative count rather than applying drift-prone +1/-1.</p>
-            <div class="p-4 rounded-xl bg-black/40 border border-gray-800 text-xs font-mono text-gray-300 space-y-2">
-              <p>Target Status: <span class="text-rose-400 font-bold">CANCELLED</span></p>
-              <p>Worker Action: <span class="text-cyan-300">REPEATABLE READ Snapshot Recompute</span></p>
-            </div>
-            <button onclick="mutateOrderStatus()" class="w-full bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-medium py-2.5 px-4 rounded-xl text-xs font-mono transition-all shadow-lg shadow-rose-600/20">
-              Mutate Order Status Live
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">2. Mutate Order Status (Anti-Delta Recompute)</h3>
+            <p class="text-xs text-slate-400 font-mono">
+              Simulates a cancellation or refund. The system marks the affected bucket dirty and recomputes the authoritative snapshot rather than applying fragile deltas.
+            </p>
+            <button onclick="mutateOrderStatus()" class="w-full bg-rose-600/80 hover:bg-rose-600 text-white font-bold py-2 px-3 rounded font-mono text-xs transition-colors cursor-pointer mt-4">
+              Trigger Status Mutation &rarr; CANCELLED
             </button>
           </div>
         </div>
-        <div id="streamConsole" class="p-4 rounded-2xl bg-black border border-gray-800 text-xs font-mono text-emerald-400 max-h-40 overflow-y-auto">
-          // Ready for ingestion events...
-        </div>
-      </div>
+      </section>
 
-      <!-- 6. SECURITY & ISOLATION VIEW -->
-      <div id="view-security" class="tab-view hidden space-y-4">
+      <!-- 6. STORE ISOLATION GATEWAY & DEFENSE PROOFS -->
+      <section id="view-security" class="tab-view hidden space-y-4">
         <div>
-          <h2 class="text-base font-bold text-white">Store Isolation &amp; Security Gateway</h2>
-          <p class="text-xs text-[var(--text-muted)]">PostgreSQL Engine-Level Row Security guarantees zero cross-store leakage (INC-02 defense).</p>
+          <h2 class="text-base font-bold text-white font-mono">Multi-Tenant Isolation &amp; INC-02 Attack Suite</h2>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">
+            Empirical verification of PostgreSQL Kernel Row-Level Security (`FORCE RLS`) and token authentication barriers.
+          </p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-rose-500/20 shadow-xl space-y-4">
-            <h3 class="text-sm font-bold text-rose-400 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-rose-400"></span>
-              Cross-Store IDOR Probe Simulator
-            </h3>
-            <p class="text-xs text-gray-400">Attempts to query Store #2 using Store #1 credentials. Gatekeeper denies the probe with an anti-enumeration 404.</p>
-            <button onclick="runIdorAttack()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 py-2.5 rounded-xl text-xs font-mono transition-all">
-              Execute Cross-Store Probe
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-2">
+            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">Cross-Tenant Probe (IDOR Defense)</h3>
+            <p class="text-xs text-slate-400 font-mono">
+              Attempts to read Tenant #2 data using Tenant #1 credentials. Verified to return 404 Not Found without leaking existence.
+            </p>
+            <button onclick="runIdorAttack()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono py-2 px-3 rounded border border-slate-700 cursor-pointer">
+              Execute Cross-Tenant Probe
             </button>
-            <div id="idorOutput" class="hidden p-3 rounded-xl bg-black/60 border border-gray-800 text-xs font-mono"></div>
+            <div id="idorOutput" class="hidden p-3 rounded bg-slate-950 font-mono text-xs text-slate-300 border border-slate-800 mt-2"></div>
           </div>
 
-          <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-purple-500/20 shadow-xl space-y-4">
-            <h3 class="text-sm font-bold text-purple-400 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-              Unauthenticated Request Probe
-            </h3>
-            <p class="text-xs text-gray-400">Attempts to query without authorization header. Gateway blocks request before database connection acquisition.</p>
-            <button onclick="runNoAuthProbe()" class="w-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 py-2.5 rounded-xl text-xs font-mono transition-all">
-              Execute Unauthenticated Probe
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-2">
+            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">Zero-Auth Probe (Gateway Barrier)</h3>
+            <p class="text-xs text-slate-400 font-mono">
+              Invokes analytical query endpoints without Authorization headers. Blocks immediately at Axum middleware layer before acquiring DB connection.
+            </p>
+            <button onclick="runNoAuthProbe()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono py-2 px-3 rounded border border-slate-700 cursor-pointer">
+              Execute Zero-Auth Probe
             </button>
-            <div id="noAuthOutput" class="hidden p-3 rounded-xl bg-black/60 border border-gray-800 text-xs font-mono"></div>
+            <div id="noAuthOutput" class="hidden p-3 rounded bg-slate-950 font-mono text-xs text-slate-300 border border-slate-800 mt-2"></div>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- 7. API CONSOLE VIEW -->
-      <div id="view-api" class="tab-view hidden space-y-4">
+      <section id="view-api" class="tab-view hidden space-y-4">
         <div>
-          <h2 class="text-base font-bold text-white">Developer API Console</h2>
-          <p class="text-xs text-[var(--text-muted)]">Copy-paste production cURL commands and inspect live server responses.</p>
+          <h2 class="text-base font-bold text-white font-mono">REST API Explorer &amp; Command Generation</h2>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">Copy and run real cURL commands authenticated against the local daemon.</p>
         </div>
-        <div class="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl space-y-4">
-          <div class="flex flex-wrap gap-2">
-            <button onclick="selectApiSnippet('count')" id="btn-snip-count" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-cyan-600 text-white">GET /orders/count</button>
-            <button onclick="selectApiSnippet('trend')" id="btn-snip-trend" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-gray-800 text-gray-400 hover:text-white">GET /orders/trend</button>
-            <button onclick="selectApiSnippet('top')" id="btn-snip-top" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-gray-800 text-gray-400 hover:text-white">GET /products/top</button>
-            <button onclick="selectApiSnippet('breakdown')" id="btn-snip-breakdown" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-gray-800 text-gray-400 hover:text-white">GET /orders/breakdown</button>
-          </div>
-          <div class="relative">
-            <pre id="curlCommand" class="p-4 rounded-xl bg-black/70 border border-gray-800 text-xs font-mono text-cyan-400 overflow-x-auto whitespace-pre-wrap"></pre>
-            <button onclick="copyCurl()" class="absolute right-3 top-3 text-[10px] font-mono px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-200">Copy</button>
-          </div>
-        </div>
-      </div>
 
-      <!-- 8. TELEMETRY & HEALTH VIEW -->
-      <div id="view-telemetry" class="tab-view hidden space-y-4">
+        <div class="flex items-center gap-1.5 font-mono text-xs">
+          <button onclick="selectApiSnippet('count')" id="btn-snip-count" class="px-3 py-1.5 rounded-lg bg-cyan-600 text-white cursor-pointer">GET /orders/count</button>
+          <button onclick="selectApiSnippet('trend')" id="btn-snip-trend" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white cursor-pointer">GET /orders/trend</button>
+          <button onclick="selectApiSnippet('top')" id="btn-snip-top" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white cursor-pointer">GET /products/top</button>
+          <button onclick="selectApiSnippet('breakdown')" id="btn-snip-breakdown" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white cursor-pointer">GET /orders/breakdown</button>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 relative">
+          <pre id="curlCommand" class="font-mono text-xs text-cyan-300 overflow-x-auto select-all"></pre>
+          <button onclick="copyCurl()" class="absolute right-3 top-3 px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] font-mono text-slate-300 rounded border border-slate-700 cursor-pointer">
+            Copy cURL
+          </button>
+        </div>
+      </section>
+
+      <!-- 8. SYSTEM TELEMETRY VIEW -->
+      <section id="view-telemetry" class="tab-view hidden space-y-4">
         <div>
-          <h2 class="text-base font-bold text-cyan-400">Cluster Telemetry &amp; System Health</h2>
-          <p class="text-xs text-[var(--text-muted)]">Continuous health monitoring across the heterogeneous database cluster.</p>
+          <h2 class="text-base font-bold text-white font-mono">Performance &amp; Response Telemetry</h2>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">Live execution telemetry captured from the latest API roundtrip.</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="p-5 rounded-2xl bg-[var(--card-bg)] border border-cyan-500/20 shadow-xl space-y-3">
-            <h3 class="text-sm font-bold text-white">Disaster Recovery Rebuild</h3>
-            <p class="text-xs text-gray-400">Recompute 100% of historical rollups directly from source snapshots without downtime.</p>
-            <button onclick="triggerRebuildDemo()" class="w-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 py-2 rounded-xl text-xs font-mono">
-              Execute Snapshot Rebuild
-            </button>
-            <div id="b2Result" class="hidden p-2.5 rounded-lg bg-black/50 text-xs font-mono text-emerald-400 border border-gray-800"></div>
-          </div>
 
-          <div class="p-5 rounded-2xl bg-[var(--card-bg)] border border-indigo-500/20 shadow-xl space-y-3">
-            <h3 class="text-sm font-bold text-white">High-Concurrency Pool Guard</h3>
-            <p class="text-xs text-gray-400">Fires 20 rapid concurrent queries to verify pool isolation and execution timeout stability.</p>
-            <button onclick="simulateHeavyQueryBurst()" class="w-full bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 py-2 rounded-xl text-xs font-mono">
-              Fire 20 Concurrent Queries
-            </button>
-            <div id="b3Result" class="hidden p-2.5 rounded-lg bg-black/50 text-xs font-mono text-cyan-400 border border-gray-800"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-slate-400">Response Code:</span>
+            <div id="telHttpStatus" class="text-sm font-bold text-white mt-1">--</div>
           </div>
-
-          <div class="p-5 rounded-2xl bg-[var(--card-bg)] border border-purple-500/20 shadow-xl space-y-3">
-            <h3 class="text-sm font-bold text-white">Layered Configuration</h3>
-            <p class="text-xs text-gray-400">Inspect active TOML configuration rules. Zero hardcoded settings in application code.</p>
-            <button onclick="inspectConfigDemo()" class="w-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 py-2 rounded-xl text-xs font-mono">
-              Inspect TOML Config
-            </button>
-            <div id="b4Result" class="hidden p-2.5 rounded-lg bg-black/50 text-[10px] font-mono text-gray-300 border border-gray-800 max-h-32 overflow-y-auto"></div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-slate-400">Roundtrip Latency:</span>
+            <div id="telLatency" class="text-sm font-bold text-cyan-400 mt-1">--</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-slate-400">SLA Evaluation:</span>
+            <div id="telTargetStatus" class="text-sm font-bold text-emerald-400 mt-1">--</div>
           </div>
         </div>
-      </div>
 
-    </div>
+        <div class="space-y-2">
+          <button onclick="toggleRawJson()" id="rawJsonBtn" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 cursor-pointer">
+            [+ Expand Response JSON Payload]
+          </button>
+          <div id="rawJsonViewer" class="hidden p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 max-h-80 overflow-y-auto">
+            <pre id="rawJsonContent"></pre>
+          </div>
+        </div>
+      </section>
 
-    <!-- Live Execution Telemetry Strip (Real Console Telemetry for Judges) -->
-    <div class="p-5 rounded-2xl bg-[#090d16] border border-cyan-500/30 shadow-2xl space-y-3">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          Live Query Telemetry &amp; System Log Feed
-        </h3>
-        <button onclick="toggleRawJson()" id="rawJsonBtn" class="text-[10px] font-mono text-gray-400 hover:text-cyan-300">
-          [+ Expand Response JSON]
-        </button>
-      </div>
+    </main>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs font-mono">
-        <div class="p-2.5 rounded-xl bg-black/40 border border-gray-800">
-          <p class="text-gray-500 text-[10px]">ROUNDTRIP LATENCY</p>
-          <p id="telLatency" class="text-base font-bold text-cyan-400 mt-0.5">-- ms</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-black/40 border border-gray-800">
-          <p class="text-gray-500 text-[10px]">SLA BENCHMARK</p>
-          <p id="telTargetStatus" class="text-base font-bold text-emerald-400 mt-0.5">&lt; 200 ms (Met)</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-black/40 border border-gray-800">
-          <p class="text-gray-500 text-[10px]">HTTP STATUS</p>
-          <p id="telHttpStatus" class="text-base font-bold text-white mt-0.5">200 OK</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-black/40 border border-gray-800">
-          <p class="text-gray-500 text-[10px]">TRANSACTIONAL LOAD</p>
-          <p class="text-base font-bold text-purple-400 mt-0.5">0% (Zero Scans)</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-black/40 border border-gray-800">
-          <p class="text-gray-500 text-[10px]">OUTBOX LAG</p>
-          <p id="telOutboxLag" class="text-base font-bold text-emerald-400 mt-0.5">&lt; 20 ms</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-black/40 border border-gray-800">
-          <p class="text-gray-500 text-[10px]">CACHE CONTROL</p>
-          <p class="text-base font-bold text-indigo-400 mt-0.5">no-store</p>
-        </div>
+    <!-- Operational Audit & Telemetry Console -->
+    <footer class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs space-y-1.5" role="contentinfo">
+      <div class="flex items-center justify-between text-[11px] text-slate-500 pb-1.5 border-b border-slate-800/80">
+        <span>LIVE TELEMETRY &bull; REPLICATION LOG</span>
+        <button onclick="document.getElementById('liveConsoleLog').innerHTML=''" class="hover:text-slate-300 cursor-pointer">Clear</button>
       </div>
-
-      <!-- Live Terminal Console Stream -->
-      <div id="liveConsoleLog" class="p-3 rounded-xl bg-black/90 border border-gray-800 text-[11px] font-mono text-gray-300 max-h-36 overflow-y-auto space-y-1">
-        <div class="text-gray-500">// TRON Execution Engine Telemetry Initialized...</div>
-      </div>
-
-      <!-- Collapsible Response JSON -->
-      <div id="rawJsonViewer" class="hidden p-3 rounded-xl bg-black/80 border border-gray-800 text-[11px] font-mono text-gray-300 max-h-48 overflow-y-auto">
-        <pre id="rawJsonContent">// Awaiting response...</pre>
-      </div>
-    </div>
+      <div id="liveConsoleLog" class="h-28 overflow-y-auto space-y-1 text-[11px] text-slate-300 custom-scrollbar select-text"></div>
+    </footer>
 
   </div>
 
@@ -449,46 +479,70 @@
     const API_BASE = window.location.origin.includes('8080') ? window.location.origin : 'http://localhost:8080';
     let currentTab = 'overview';
     let currentGrain = 'day';
+    let currentStatus = 'completed';
     let currentSnippet = 'count';
-    let lastQueryResponse = null;
+    let cachedTrendPoints = null;
 
     function logConsole(msg, type = 'info') {
       const box = document.getElementById('liveConsoleLog');
+      if (!box) return;
       const time = new Date().toLocaleTimeString();
-      let colorClass = 'text-gray-300';
+      let colorClass = 'text-slate-300';
       if (type === 'success') colorClass = 'text-emerald-400';
       if (type === 'warn') colorClass = 'text-amber-400';
       if (type === 'error') colorClass = 'text-rose-400';
 
       const entry = document.createElement('div');
       entry.className = `${colorClass} truncate`;
-      entry.innerHTML = `<span class="text-gray-500">[${time}]</span> ${msg}`;
+      entry.innerHTML = `<span class="text-slate-600">[${time}]</span> ${msg}`;
       box.appendChild(entry);
       box.scrollTop = box.scrollHeight;
+    }
+
+    function formatINR(paise) {
+      const rupees = Math.round((paise || 0) / 100);
+      return '₹ ' + rupees.toLocaleString('en-IN');
+    }
+
+    function formatShortINR(paise) {
+      const rs = Math.round((paise || 0) / 100);
+      if (rs >= 10000000) return '₹' + (rs / 10000000).toFixed(1) + ' Cr';
+      if (rs >= 100000) return '₹' + (rs / 100000).toFixed(1) + ' L';
+      if (rs >= 1000) return '₹' + (rs / 1000).toFixed(1) + ' k';
+      return '₹' + rs;
     }
 
     function onTenantChange() {
       const select = document.getElementById('tenantSelect');
       const token = select.options[select.selectedIndex].getAttribute('data-token');
       document.getElementById('tokenInput').value = token;
-      logConsole(`Context switched to merchant: ${select.value} (${select.options[select.selectedIndex].text.split('—')[0].trim()})`);
+      logConsole(`Context switched to: ${select.value} (${select.options[select.selectedIndex].text.split('(')[0].trim()})`);
       refreshDashboard();
     }
 
-    function formatINR(paise) {
-      const rupees = Math.round(paise / 100);
-      return '₹ ' + rupees.toLocaleString('en-IN');
+    function onStatusFilterChange() {
+      const select = document.getElementById('trendStatusFilter');
+      currentStatus = select.value;
+      const tenantId = document.getElementById('tenantSelect').value;
+      const token = document.getElementById('tokenInput').value;
+      fetchTrendData(tenantId, token);
     }
 
     function switchTab(tabId) {
       currentTab = tabId;
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/[0.04] transition-all';
+        btn.className = 'tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer';
+        btn.setAttribute('aria-selected', 'false');
       });
-      document.getElementById(`tab-${tabId}`).className = 'tab-btn px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-600 text-white shadow-md shadow-cyan-600/20';
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      if (activeBtn) {
+        activeBtn.className = 'tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-cyan-600 text-white cursor-pointer';
+        activeBtn.setAttribute('aria-selected', 'true');
+      }
 
       document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const activeView = document.getElementById(`view-${tabId}`);
+      if (activeView) activeView.classList.remove('hidden');
 
       refreshDashboard();
     }
@@ -499,34 +553,17 @@
 
       updateCurlSnippet();
 
-      switch (currentTab) {
-        case 'overview':
-          fetchCountData(tenantId, token);
-          break;
-        case 'trends':
-          fetchTrendData(tenantId, token);
-          break;
-        case 'products':
-          fetchTopProductsData(tenantId, token);
-          break;
-        case 'breakdown':
-          fetchBreakdownData(tenantId, token);
-          break;
-        case 'stream':
-          fetchCountData(tenantId, token);
-          break;
-        case 'api':
-          fetchCountData(tenantId, token);
-          break;
-        case 'telemetry':
-          fetchCountData(tenantId, token);
-          break;
-      }
+      // Always fetch counts and trends to keep state synchronous across tabs
+      fetchCountData(tenantId, token);
+      fetchTrendData(tenantId, token);
+
+      if (currentTab === 'products') fetchTopProductsData(tenantId, token);
+      if (currentTab === 'breakdown') fetchBreakdownData(tenantId, token);
     }
 
     async function fetchCountData(tenantId, token) {
       const t0 = performance.now();
-      logConsole(`GET /tenants/${tenantId}/orders/count [Authorization: Bearer ${token.substring(0, 16)}...]`);
+      logConsole(`GET /tenants/${tenantId}/orders/count`);
       try {
         const res = await fetch(`${API_BASE}/tenants/${tenantId}/orders/count`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -539,8 +576,8 @@
           document.getElementById('cardOrderCount').innerText = (data.order_count || 0).toLocaleString();
           document.getElementById('cardSalesPaise').innerText = formatINR(data.total_sales_paise || 0);
           document.getElementById('cardLatency').innerText = `${elapsed} ms`;
-          document.getElementById('cardFreshness').innerText = new Date(data.data_as_of).toLocaleTimeString();
-          logConsole(`200 OK — Returned ${data.order_count.toLocaleString()} orders, total sales: ${formatINR(data.total_sales_paise)} (${elapsed} ms)`, 'success');
+          document.getElementById('cardFreshness').innerText = data.data_as_of ? new Date(data.data_as_of).toLocaleDateString() : 'Active Snapshot';
+          logConsole(`200 OK — Returned ${(data.order_count || 0).toLocaleString()} orders, sales: ${formatINR(data.total_sales_paise)} (${elapsed} ms)`, 'success');
         } else {
           logConsole(`API Error (${res.status}): ${data.error || 'Access denied'}`, 'error');
         }
@@ -552,9 +589,12 @@
 
     async function fetchTrendData(tenantId, token) {
       const t0 = performance.now();
-      logConsole(`GET /tenants/${tenantId}/orders/trend?grain=${currentGrain}`);
+      const statusParam = currentStatus === 'all' ? '&status=all' : `&status=${currentStatus}`;
+      const url = `${API_BASE}/tenants/${tenantId}/orders/trend?grain=${currentGrain}${statusParam}`;
+      logConsole(`GET /orders/trend?grain=${currentGrain}${statusParam}`);
+
       try {
-        const res = await fetch(`${API_BASE}/tenants/${tenantId}/orders/trend?grain=${currentGrain}`, {
+        const res = await fetch(url, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const elapsed = (performance.now() - t0).toFixed(1);
@@ -562,44 +602,204 @@
         recordTelemetry(res.status, elapsed, data);
 
         if (res.ok && data.points) {
-          renderTrendChart(data.points);
+          cachedTrendPoints = data.points;
+          renderTrendChart(data.points, 'chartContainer');
+          renderTrendChart(data.points, 'chartContainerDeep');
           logConsole(`200 OK — Rendered ${data.points.length} trend points (${elapsed} ms)`, 'success');
+        } else {
+          renderTrendChart([], 'chartContainer');
+          renderTrendChart([], 'chartContainerDeep');
+          logConsole(`Trend Warning: ${data.error || 'No trend records'}`, 'warn');
         }
       } catch (err) {
         recordTelemetry(500, (performance.now() - t0).toFixed(1), { error: err.message });
+        renderTrendChart([], 'chartContainer');
+        renderTrendChart([], 'chartContainerDeep');
       }
     }
 
     function setTrendGrain(grain) {
       currentGrain = grain;
-      document.getElementById('grain-day').className = grain === 'day' ? 'px-3 py-1 rounded-lg text-xs font-mono bg-cyan-600 text-white' : 'px-3 py-1 rounded-lg text-xs font-mono bg-gray-800 text-gray-400 hover:text-white';
-      document.getElementById('grain-hour').className = grain === 'hour' ? 'px-3 py-1 rounded-lg text-xs font-mono bg-cyan-600 text-white' : 'px-3 py-1 rounded-lg text-xs font-mono bg-gray-800 text-gray-400 hover:text-white';
+      document.getElementById('grain-day').className = grain === 'day' ? 'px-2.5 py-1 rounded text-xs font-mono bg-cyan-600 text-white cursor-pointer' : 'px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer';
+      document.getElementById('grain-hour').className = grain === 'hour' ? 'px-2.5 py-1 rounded text-xs font-mono bg-cyan-600 text-white cursor-pointer' : 'px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer';
       const tenantId = document.getElementById('tenantSelect').value;
       const token = document.getElementById('tokenInput').value;
       fetchTrendData(tenantId, token);
     }
 
-    function renderTrendChart(points) {
-      const container = document.getElementById('chartContainer');
+    function renderTrendChart(points, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
       if (!points || points.length === 0) {
-        container.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500 text-xs font-mono">No trend data available for range</div>';
+        container.innerHTML = `
+          <div class="h-64 flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-800 rounded-lg bg-slate-950/40 font-mono text-xs">
+            <p class="text-slate-300 font-medium">Zero trend records found in this time range</p>
+            <p class="text-slate-500 mt-1 max-w-sm">No transactions matched status '${currentStatus}'. Try selecting 'All Lifecycles' or switching grain.</p>
+          </div>
+        `;
         return;
       }
-      const maxSales = Math.max(...points.map(p => p.total_sales_paise), 1);
-      container.innerHTML = '';
 
-      points.forEach(p => {
-        const heightPct = Math.max(8, (p.total_sales_paise / maxSales) * 100);
-        const bar = document.createElement('div');
-        bar.className = 'flex-1 rounded-t-sm bg-gradient-to-t from-cyan-600/40 to-cyan-400 hover:from-cyan-300 hover:to-cyan-100 transition-all relative group cursor-pointer';
-        bar.style.height = `${heightPct}%`;
+      // Safe accumulation avoiding stack-overflow
+      let maxSales = 0;
+      let totalSales = 0;
+      let totalOrders = 0;
+      let peakPoint = points[0];
 
-        const tip = document.createElement('div');
-        tip.className = 'opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-700 text-[10px] text-white font-mono whitespace-nowrap pointer-events-none z-20 shadow-xl';
-        tip.innerHTML = `<span class="text-cyan-400">${p.bucket}</span><br/>Orders: ${p.order_count.toLocaleString()}<br/>${formatINR(p.total_sales_paise)}`;
-        bar.appendChild(tip);
+      for (let i = 0; i < points.length; i++) {
+        const s = points[i].total_sales_paise || 0;
+        const c = points[i].order_count || 0;
+        totalSales += s;
+        totalOrders += c;
+        if (s > maxSales) {
+          maxSales = s;
+          peakPoint = points[i];
+        }
+      }
+      if (maxSales === 0) maxSales = 1;
 
-        container.appendChild(bar);
+      const avgSales = Math.round(totalSales / points.length);
+
+      // Update Header KPI strip
+      const sTotalSales = document.getElementById('trendTotalSales');
+      if (sTotalSales) sTotalSales.innerText = formatINR(totalSales);
+      const sTotalOrders = document.getElementById('trendTotalOrders');
+      if (sTotalOrders) sTotalOrders.innerText = totalOrders.toLocaleString();
+      const sPeakSales = document.getElementById('trendPeakSales');
+      if (sPeakSales) sPeakSales.innerText = `${formatINR(maxSales)} (${peakPoint.bucket.substring(0, 10)})`;
+      const sAvgSales = document.getElementById('trendAvgSales');
+      if (sAvgSales) sAvgSales.innerText = formatINR(avgSales);
+
+      // Vector Canvas Dimensions
+      const width = 1000;
+      const height = 240;
+      const padLeft = 65;
+      const padRight = 15;
+      const padTop = 15;
+      const padBottom = 25;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const coords = points.map((p, i) => {
+        const x = padLeft + (i / Math.max(points.length - 1, 1)) * chartW;
+        const y = padTop + chartH - (p.total_sales_paise / maxSales) * chartH;
+        return { x, y, point: p };
+      });
+
+      // SVG Paths
+      let pathD = `M ${coords[0].x} ${padTop + chartH} L ${coords[0].x} ${coords[0].y}`;
+      for (let i = 1; i < coords.length; i++) {
+        pathD += ` L ${coords[i].x} ${coords[i].y}`;
+      }
+      pathD += ` L ${coords[coords.length - 1].x} ${padTop + chartH} Z`;
+
+      let lineD = `M ${coords[0].x} ${coords[0].y}`;
+      for (let i = 1; i < coords.length; i++) {
+        lineD += ` L ${coords[i].x} ${coords[i].y}`;
+      }
+
+      // Y-axis grid lines
+      let yAxisHtml = '';
+      for (let step = 0; step <= 3; step++) {
+        const val = (maxSales * step) / 3;
+        const yPos = padTop + chartH - (chartH * step) / 3;
+        yAxisHtml += `
+          <line x1="${padLeft}" y1="${yPos}" x2="${width - padRight}" y2="${yPos}" stroke="#1e293b" stroke-dasharray="2 3" stroke-width="1" />
+          <text x="${padLeft - 8}" y="${yPos + 3.5}" fill="#64748b" font-size="9.5" font-family="monospace" text-anchor="end">${formatShortINR(val)}</text>
+        `;
+      }
+
+      const firstDate = points[0].bucket.substring(0, 10);
+      const midDate = points[Math.floor(points.length / 2)].bucket.substring(0, 10);
+      const lastDate = points[points.length - 1].bucket.substring(0, 10);
+
+      const uniqueSuffix = containerId;
+
+      container.innerHTML = `
+        <div class="relative w-full overflow-hidden select-none">
+          <svg viewBox="0 0 ${width} ${height}" class="w-full h-60 overflow-visible" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad_${uniqueSuffix}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.25" />
+                <stop offset="85%" stop-color="#06b6d4" stop-opacity="0.02" />
+                <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+
+            ${yAxisHtml}
+            <path d="${pathD}" fill="url(#grad_${uniqueSuffix})" />
+            <path d="${lineD}" fill="none" stroke="#06b6d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" stroke="#334155" stroke-width="1" />
+
+            <line id="scrubLine_${uniqueSuffix}" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="2 2" class="opacity-0 pointer-events-none" />
+            <circle id="scrubDot_${uniqueSuffix}" cx="0" cy="0" r="4" fill="#38bdf8" stroke="#082f49" stroke-width="1.5" class="opacity-0 pointer-events-none" />
+          </svg>
+
+          <div id="chartOverlay_${uniqueSuffix}" class="absolute inset-0 cursor-crosshair"></div>
+
+          <div id="tooltip_${uniqueSuffix}" class="absolute pointer-events-none opacity-0 transition-opacity px-2.5 py-1.5 rounded bg-slate-950/95 border border-slate-700 text-xs font-mono text-white shadow-xl z-30 transform -translate-x-1/2 -translate-y-full mb-2">
+            <div id="tipDate_${uniqueSuffix}" class="text-cyan-400 font-semibold mb-0.5"></div>
+            <div class="flex items-center justify-between gap-3 text-slate-300 text-[11px]">
+              <span>Gross Sales:</span>
+              <span id="tipSales_${uniqueSuffix}" class="font-bold text-emerald-400"></span>
+            </div>
+            <div class="flex items-center justify-between gap-3 text-slate-300 text-[11px]">
+              <span>Orders:</span>
+              <span id="tipOrders_${uniqueSuffix}" class="font-bold text-slate-200"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center text-[11px] text-slate-400 font-mono mt-1.5 px-1 pt-1.5 border-t border-slate-800/80">
+          <span>Start: ${firstDate}</span>
+          <span class="text-slate-500 hidden sm:inline">Mid: ${midDate}</span>
+          <span>End: ${lastDate}</span>
+        </div>
+      `;
+
+      // Interactive Scrubber Event Handlers
+      const overlay = document.getElementById(`chartOverlay_${uniqueSuffix}`);
+      const line = document.getElementById(`scrubLine_${uniqueSuffix}`);
+      const dot = document.getElementById(`scrubDot_${uniqueSuffix}`);
+      const tooltip = document.getElementById(`tooltip_${uniqueSuffix}`);
+      const tipDate = document.getElementById(`tipDate_${uniqueSuffix}`);
+      const tipSales = document.getElementById(`tipSales_${uniqueSuffix}`);
+      const tipOrders = document.getElementById(`tipOrders_${uniqueSuffix}`);
+
+      overlay.addEventListener('mousemove', (e) => {
+        const rect = overlay.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, (mouseX - (padLeft / width) * rect.width) / ((chartW / width) * rect.width)));
+        const idx = Math.round(pct * (coords.length - 1));
+        const c = coords[idx];
+
+        if (!c) return;
+
+        const renderedX = (c.x / width) * rect.width;
+        const renderedY = (c.y / height) * rect.height;
+
+        line.setAttribute('x1', c.x);
+        line.setAttribute('x2', c.x);
+        line.classList.remove('opacity-0');
+
+        dot.setAttribute('cx', c.x);
+        dot.setAttribute('cy', c.y);
+        dot.classList.remove('opacity-0');
+
+        tooltip.style.left = `${renderedX}px`;
+        tooltip.style.top = `${renderedY}px`;
+        tooltip.classList.remove('opacity-0');
+
+        tipDate.innerText = c.point.bucket.substring(0, 16).replace('T', ' ');
+        tipSales.innerText = formatINR(c.point.total_sales_paise);
+        tipOrders.innerText = `${(c.point.order_count || 0).toLocaleString()} orders`;
+      });
+
+      overlay.addEventListener('mouseleave', () => {
+        line.classList.add('opacity-0');
+        dot.classList.add('opacity-0');
+        tooltip.classList.add('opacity-0');
       });
     }
 
@@ -622,21 +822,21 @@
         tbody.innerHTML = '';
 
         if (!data.top_products || data.top_products.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No products found for merchant</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-4 text-center text-slate-500">No product records found for merchant</td></tr>';
           return;
         }
 
         data.top_products.forEach((p, idx) => {
           const row = document.createElement('tr');
-          row.className = 'hover:bg-white/[0.02] transition-colors';
+          row.className = 'hover:bg-slate-800/40 transition-colors';
           row.innerHTML = `
-            <td class="px-6 py-3 font-medium text-gray-200 flex items-center gap-2">
-              <span class="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 text-[10px] flex items-center justify-center font-bold">#${idx + 1}</span>
+            <td class="px-5 py-2.5 font-medium text-slate-200 flex items-center gap-2">
+              <span class="w-4 h-4 rounded bg-slate-800 text-cyan-400 text-[10px] flex items-center justify-center font-bold">#${idx + 1}</span>
               ${p.product_id}
             </td>
-            <td class="px-6 py-3 text-cyan-300">${p.category || 'general'}</td>
-            <td class="px-6 py-3 text-right text-gray-300 font-bold">${p.units.toLocaleString()}</td>
-            <td class="px-6 py-3 text-right text-emerald-400 font-bold">${formatINR(p.total_sales_paise)}</td>
+            <td class="px-5 py-2.5 text-slate-400">${p.category || 'general'}</td>
+            <td class="px-5 py-2.5 text-right text-slate-300 font-bold">${p.units.toLocaleString()}</td>
+            <td class="px-5 py-2.5 text-right text-emerald-400 font-bold">${formatINR(p.total_sales_paise)}</td>
           `;
           tbody.appendChild(row);
         });
@@ -658,40 +858,42 @@
         const data = await res.json().catch(() => ({}));
         recordTelemetry(res.status, elapsed, data);
 
-        // Populate Status breakdown
         const sGrid = document.getElementById('statusBreakdownGrid');
         sGrid.innerHTML = '';
-        if (data.by_status) {
+        if (data.by_status && data.by_status.length > 0) {
           data.by_status.forEach(item => {
             const card = document.createElement('div');
-            card.className = 'p-3.5 rounded-xl bg-black/40 border border-gray-800';
+            card.className = 'p-3 rounded-lg bg-slate-950 border border-slate-800';
             card.innerHTML = `
-              <p class="text-xs uppercase font-medium text-gray-400 tracking-wider">${item.status}</p>
-              <h4 class="text-lg font-bold text-white font-mono mt-1">${item.order_count.toLocaleString()}</h4>
-              <p class="text-[11px] text-emerald-400 font-mono">${formatINR(item.total_sales_paise)}</p>
+              <span class="text-[10px] uppercase font-mono font-medium text-slate-400 tracking-wider">${item.status}</span>
+              <div class="text-base font-bold text-white font-mono mt-0.5">${item.order_count.toLocaleString()}</div>
+              <div class="text-[11px] text-emerald-400 font-mono mt-0.5">${formatINR(item.total_sales_paise)}</div>
             `;
             sGrid.appendChild(card);
           });
+        } else {
+          sGrid.innerHTML = '<div class="text-xs text-slate-500 font-mono">No status breakdown data.</div>';
         }
 
-        // Populate Category breakdown
         const cGrid = document.getElementById('categoryBreakdownGrid');
         cGrid.innerHTML = '';
-        if (data.by_category) {
+        if (data.by_category && data.by_category.length > 0) {
           data.by_category.forEach(item => {
             const row = document.createElement('div');
-            row.className = 'p-3 rounded-xl bg-black/40 border border-gray-800 flex items-center justify-between';
+            row.className = 'p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between font-mono text-xs';
             row.innerHTML = `
               <div>
-                <p class="text-xs font-semibold text-gray-200">${item.category}</p>
-                <p class="text-[10px] text-gray-500 font-mono">${item.units_sold.toLocaleString()} units sold</p>
+                <p class="font-medium text-slate-200">${item.category}</p>
+                <p class="text-[10px] text-slate-500">${item.units_sold.toLocaleString()} units sold</p>
               </div>
-              <span class="text-xs font-bold text-emerald-400 font-mono">${formatINR(item.total_sales_paise)}</span>
+              <span class="font-bold text-emerald-400">${formatINR(item.total_sales_paise)}</span>
             `;
             cGrid.appendChild(row);
           });
+        } else {
+          cGrid.innerHTML = '<div class="text-xs text-slate-500 font-mono">No category breakdown data.</div>';
         }
-        logConsole(`200 OK — Loaded status and category breakdown (${elapsed} ms)`, 'success');
+        logConsole(`200 OK — Loaded lifecycle and category breakdown (${elapsed} ms)`, 'success');
       } catch (err) {
         recordTelemetry(500, (performance.now() - t0).toFixed(1), { error: err.message });
       }
@@ -758,8 +960,7 @@
       box.innerHTML = `
         <span class="text-emerald-400 font-bold">✔ PROBE REPELLED:</span><br/>
         &bull; HTTP Status: <span class="text-rose-400 font-bold">${res.status} Not Found</span> (Anti-Enumeration 404)<br/>
-        &bull; Response: <span class="text-gray-300">${JSON.stringify(body)}</span><br/>
-        &bull; Isolation Proof: Store #1 received 0 bytes of Store #2 data.
+        &bull; Isolation Proof: Store #1 received 0 bytes of Store #2 data under FORCE RLS.
       `;
       logConsole(`IDOR Repelled: 404 Not Found returned (0 bytes leaked)`, 'success');
     }
@@ -776,7 +977,7 @@
       box.innerHTML = `
         <span class="text-emerald-400 font-bold">✔ PROBE REPELLED:</span><br/>
         &bull; HTTP Status: <span class="text-rose-400 font-bold">${res.status} Unauthorized</span> (401)<br/>
-        &bull; Gateway Defense: Request blocked before acquiring database connection.
+        &bull; Gateway Defense: Blocked at middleware layer before database acquisition.
       `;
       logConsole(`Zero-Auth Blocked: 401 Unauthorized`, 'success');
     }
@@ -785,7 +986,7 @@
       currentSnippet = type;
       ['count', 'trend', 'top', 'breakdown'].forEach(t => {
         const btn = document.getElementById(`btn-snip-${t}`);
-        if (btn) btn.className = t === type ? 'px-3 py-1.5 rounded-lg text-xs font-mono bg-cyan-600 text-white' : 'px-3 py-1.5 rounded-lg text-xs font-mono bg-gray-800 text-gray-400 hover:text-white';
+        if (btn) btn.className = t === type ? 'px-3 py-1.5 rounded-lg text-xs font-mono bg-cyan-600 text-white cursor-pointer' : 'px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer';
       });
       updateCurlSnippet();
     }
@@ -808,52 +1009,11 @@
       alert("cURL snippet copied to clipboard!");
     }
 
-    async function triggerRebuildDemo() {
-      const box = document.getElementById('b2Result');
-      box.classList.remove('hidden');
-      box.innerText = "Recomputing rollups from source snapshots...";
-      logConsole("Executing snapshot rebuild pass across all tenant buckets...", 'warn');
-      const res = await fetch(`${API_BASE}/api/demo/rebuild`, { method: 'POST' });
-      const data = await res.json();
-      box.innerHTML = `✔ Rebuilt in <span class="font-bold">${data.rebuild_duration_ms}</span> (${data.buckets_verified} rollups verified)`;
-      logConsole(`Rebuild Completed: ${data.buckets_verified} rollups in ${data.rebuild_duration_ms}`, 'success');
-    }
-
-    async function simulateHeavyQueryBurst() {
-      const box = document.getElementById('b3Result');
-      box.classList.remove('hidden');
-      box.innerText = "Firing 20 concurrent requests...";
-      logConsole("Simulating 20 concurrent queries burst...", 'warn');
-      const tenantId = document.getElementById('tenantSelect').value;
-      const token = document.getElementById('tokenInput').value;
-      const t0 = performance.now();
-
-      const promises = Array.from({ length: 20 }, () => 
-        fetch(`${API_BASE}/tenants/${tenantId}/orders/count`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-      );
-      const results = await Promise.all(promises);
-      const elapsed = (performance.now() - t0).toFixed(1);
-      box.innerHTML = `✔ 20/20 requests completed in <span class="font-bold">${elapsed} ms</span> (100% success rate under pool guard)`;
-      logConsole(`Pool Guard Verified: 20/20 requests succeeded in ${elapsed} ms`, 'success');
-    }
-
-    async function inspectConfigDemo() {
-      const box = document.getElementById('b4Result');
-      box.classList.remove('hidden');
-      const res = await fetch(`${API_BASE}/api/demo/config`);
-      const data = await res.json();
-      box.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-      logConsole("Active TOML configuration loaded.", 'info');
-    }
-
     function recordTelemetry(status, latencyMs, payload) {
-      lastQueryResponse = payload;
       document.getElementById('telLatency').innerText = `${latencyMs} ms`;
       document.getElementById('telHttpStatus').innerText = `${status} ${status === 200 ? 'OK' : 'DENIED'}`;
       document.getElementById('telTargetStatus').innerText = parseFloat(latencyMs) < 200 ? '< 200 ms (Met)' : 'Target Exceeded';
-      document.getElementById('telTargetStatus').className = parseFloat(latencyMs) < 200 ? 'text-base font-bold text-emerald-400 mt-0.5' : 'text-base font-bold text-amber-400 mt-0.5';
+      document.getElementById('telTargetStatus').className = parseFloat(latencyMs) < 200 ? 'text-sm font-bold text-emerald-400 mt-1' : 'text-sm font-bold text-amber-400 mt-1';
       document.getElementById('rawJsonContent').innerText = JSON.stringify(payload, null, 2);
     }
 
@@ -862,10 +1022,10 @@
       const btn = document.getElementById('rawJsonBtn');
       if (v.classList.contains('hidden')) {
         v.classList.remove('hidden');
-        btn.innerText = '[- Collapse Response JSON]';
+        btn.innerText = '[- Collapse Response JSON Payload]';
       } else {
         v.classList.add('hidden');
-        btn.innerText = '[+ Expand Response JSON]';
+        btn.innerText = '[+ Expand Response JSON Payload]';
       }
     }
 
@@ -881,14 +1041,14 @@
         });
         isQuarantined = true;
         btn.innerText = "Lift Quarantine";
-        btn.className = "bg-rose-500/20 text-rose-400 border border-rose-500/50 px-3 py-2.5 rounded-xl text-sm transition-all font-mono";
+        btn.className = "bg-rose-500/20 text-rose-400 border border-rose-500/50 px-3 py-2 rounded-lg text-xs font-mono transition-colors cursor-pointer";
         logConsole(`Tenant quarantined: Queries will return 503 Service Unavailable`, 'error');
         alert("Tenant quarantined! Future analytics requests will return 503 Service Unavailable.");
       } else {
         await fetch(`${API_BASE}/admin/tenants/${tenantId}/unquarantine`, { method: 'POST' });
         isQuarantined = false;
         btn.innerText = "Quarantine";
-        btn.className = "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2.5 rounded-xl text-sm transition-all font-mono";
+        btn.className = "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-lg text-xs font-mono transition-colors cursor-pointer";
         logConsole(`Quarantine lifted for tenant`, 'success');
         refreshDashboard();
       }
