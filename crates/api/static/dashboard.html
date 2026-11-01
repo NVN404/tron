@@ -3,257 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRON | Multi-Tenant Real-Time Aggregation Platform</title>
+  <title>TRON Platform | Real-Time Multi-Tenant Analytics Sandbox</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-base: #070a13;
-      --card-bg: #0d1322;
-      --card-border: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent-cyan: #06b6d4;
-      --accent-emerald: #10b981;
-      --accent-rose: #f43f5e;
-      --accent-amber: #f59e0b;
-    }
     body {
-      background-color: var(--bg-base);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #070a13;
+      background: #f1f5f9;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #1e293b;
+      background: #cbd5e1;
       border-radius: 3px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #334155;
+      background: #94a3b8;
     }
   </style>
 </head>
-<body class="min-h-screen p-4 md:p-6 antialiased custom-scrollbar selection:bg-cyan-500/30 selection:text-cyan-200">
-  <div class="max-w-7xl mx-auto space-y-5">
+<body class="min-h-screen p-4 md:p-8 antialiased custom-scrollbar selection:bg-slate-900 selection:text-white">
+  <div class="max-w-7xl mx-auto space-y-6">
 
-    <!-- Operational Header -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-800 gap-4" role="banner">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-mono font-bold text-lg">
+    <!-- Top Navigation Utility Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2.5 rounded-lg bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-xs gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+          Hackathon Interactive Sandbox
+        </span>
+        <span class="text-slate-300">|</span>
+        <span class="text-slate-600 font-medium">Live CDC Outbox Mutations, 1M+ Tenant Benchmarks &amp; Rollups</span>
+      </div>
+      <a href="/ciso" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors self-start sm:self-auto shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        <span>Open CISO Security Console</span>
+      </a>
+    </div>
+
+    <!-- Main Corporate Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between pb-5 border-b border-slate-200 gap-4" role="banner">
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 rounded-lg bg-slate-900 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
           TR
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-lg md:text-xl font-bold tracking-tight text-white font-mono">
-              TRON <span class="text-xs font-normal text-slate-400 font-sans">v0.1.0</span>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-slate-900">
+              TRON Analytical Serving Platform
             </h1>
-            <span class="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-              Multi-Tenant Aggregation Layer
+            <span class="text-[11px] font-medium tracking-wide px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-mono">
+              v0.1.0
+            </span>
+            <span class="text-[11px] font-medium tracking-wide px-2.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+              Multi-Tenant Architecture
             </span>
           </div>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">
-            Heterogeneous Outbox &bull; Rust Workers &bull; Kernel RLS Isolation &bull; Sub-5ms Query Serving
+          <p class="text-xs text-slate-500 mt-0.5">
+            Heterogeneous Outbox &bull; Rust Workers &bull; Kernel RLS Isolation &bull; Sub-5ms Query Latency
           </p>
         </div>
       </div>
 
       <!-- Engine Telemetry Status Badges -->
-      <div class="flex flex-wrap items-center gap-2 text-xs font-mono" aria-label="System Security Status">
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          RLS: FORCE ENABLED
+      <div class="flex flex-wrap items-center gap-2.5 text-xs">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+          <span>RLS: FORCE ENABLED</span>
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-medium font-mono text-[11px]">
+          NOSUPER &bull; NOBYPASS
         </span>
       </div>
     </header>
 
     <!-- Global Controls: Store Switcher, Token, Actions -->
-    <section class="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 rounded-xl bg-slate-900/70 border border-slate-800 shadow-sm" aria-label="Store Context Selector">
-      <div class="md:col-span-5">
-        <label for="tenantSelect" class="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1.5 font-mono">
-          Active Merchant Store
-        </label>
-        <select id="tenantSelect" onchange="onTenantChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors font-mono cursor-pointer">
-          <optgroup label="1 Million Real Records (Kaggle / UCI Online Retail II)">
-            <option value="00000000-0000-0044-0000-000000000001" data-token="token-retail-uk" selected>United Kingdom Flagship (977,026 Orders, ₹18.6 Cr)</option>
-            <option value="00000000-0000-0044-0000-000000000002" data-token="token-retail-ie">EIRE Ireland Retail (17,354 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000003" data-token="token-retail-de">Germany Direct Retail (16,703 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000004" data-token="token-retail-fr">France Boutique Retail (13,941 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000005" data-token="token-retail-es">Spain Commercial Retail (3,720 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000006" data-token="token-retail-nl">Netherlands Direct Retail (5,093 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000007" data-token="token-retail-be">Belgium Retail Store (3,069 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000008" data-token="token-retail-ch">Switzerland Alpine Retail (3,137 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000009" data-token="token-retail-pt">Portugal Direct Retail (2,562 Orders)</option>
-            <option value="00000000-0000-0044-0000-000000000010" data-token="token-retail-au">Australia Pacific Retail (1,815 Orders)</option>
-          </optgroup>
-          <optgroup label="Real Commercial Stores (Olist Brazilian E-Commerce)">
-            <option value="55c98fb8-24f1-5b9f-9d66-be4e447d524f" data-token="token-olist-6560211a">Olist Store 6560211a — Watches &amp; Gifts (1,996 Orders)</option>
-          </optgroup>
-          <optgroup label="Multi-Tenant Scale Tenants (Simulated Zipf)">
-            <option value="00000000-0000-0001-0000-000000000001" data-token="token-tenant-1">Tenant #1 — Flagship Store (750k Orders, ₹3.56 Cr)</option>
-            <option value="00000000-0000-0002-0000-000000000001" data-token="token-tenant-2">Tenant #2 — Global Goods (404k Orders, ₹1.93 Cr)</option>
-            <option value="00000000-0000-0003-0000-000000000001" data-token="token-tenant-3">Tenant #3 — Tech Electronics (289k Orders, ₹1.39 Cr)</option>
-            <option value="00000000-0000-0042-0000-000000000001" data-token="token-tenant-42">Tenant #42 — PRD Specification Tenant (12.2k Orders)</option>
-          </optgroup>
-          <optgroup label="Heterogeneous Source Databases">
-            <option value="032d7222-090d-59bc-9ccb-b5f054d057c1" data-token="token-032d7222-090d-59bc-9ccb-b5f054d057c1">PostgreSQL Source 2 (Direct Outbox)</option>
-            <option value="24c5b05b-4f74-5d3f-9f27-ec4296400976" data-token="token-24c5b05b-4f74-5d3f-9f27-ec4296400976">MySQL 8.0 Source (Sales Outbox)</option>
-            <option value="f8979f1b-ff3f-59f8-89bb-9d39a222e096" data-token="token-f8979f1b-ff3f-59f8-89bb-9d39a222e096">MongoDB 7.0 Replica Set (Change Stream)</option>
-          </optgroup>
-        </select>
-      </div>
+    <section class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]" aria-label="Store Context Selector">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+        <div class="md:col-span-5 space-y-1.5">
+          <label for="tenantSelect" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+            Active Merchant Store Context
+          </label>
+          <select id="tenantSelect" onchange="onTenantChange()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500 transition-colors cursor-pointer shadow-xs">
+            <optgroup label="1 Million Real Records (Kaggle / UCI Online Retail II)">
+              <option value="00000000-0000-0044-0000-000000000001" data-token="token-retail-uk" selected>United Kingdom Flagship (997,759 Real Orders, ₹52.0 Cr)</option>
+              <option value="00000000-0000-0044-0000-000000000002" data-token="token-retail-ie">EIRE Ireland Retail (17,866 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000003" data-token="token-retail-de">Germany Direct Retail (17,624 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000004" data-token="token-retail-fr">France Boutique Retail (14,330 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000005" data-token="token-retail-es">Spain Commercial Retail (3,811 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000006" data-token="token-retail-nl">Netherlands Direct Retail (5,140 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000007" data-token="token-retail-be">Belgium Commerce Store (3,123 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000008" data-token="token-retail-ch">Switzerland Alpine Retail (3,189 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000009" data-token="token-retail-pt">Portugal Direct Retail (2,620 Orders)</option>
+              <option value="00000000-0000-0044-0000-000000000010" data-token="token-retail-au">Australia Global Retail (1,913 Orders)</option>
+            </optgroup>
+            <optgroup label="Real Commercial Stores (Olist Brazilian E-Commerce)">
+              <option value="55c98fb8-24f1-5b9f-9d66-be4e447d524f" data-token="token-olist-6560211a">Olist Store 6560211a — Watches &amp; Gifts (2,033 Orders)</option>
+              <option value="33771f56-c921-576b-9b19-154e7fbb911d" data-token="token-olist-4a3ca931">Olist Store 4a3ca931 — Bed, Bath &amp; Table (1,987 Orders)</option>
+              <option value="10dc2dd3-57a7-5e9d-b2df-7fb0ef82eb3b" data-token="token-olist-1f50f920">Olist Store 1f50f920 — Garden &amp; Tools (1,931 Orders)</option>
+            </optgroup>
+            <optgroup label="Multi-Tenant Scale Tenants (Simulated Zipf)">
+              <option value="00000000-0000-0001-0000-000000000001" data-token="token-tenant-1">Tenant #1 — Flagship Store (915k Orders, ₹4.34 Cr)</option>
+              <option value="00000000-0000-0002-0000-000000000001" data-token="token-tenant-2">Tenant #2 — Global Goods (493k Orders, ₹2.35 Cr)</option>
+              <option value="00000000-0000-0003-0000-000000000001" data-token="token-tenant-3">Tenant #3 — Tech Electronics (352k Orders, ₹1.71 Cr)</option>
+              <option value="00000000-0000-0042-0000-000000000001" data-token="token-tenant-42">Store #42 — Official PRD Specification Tenant (12.2k Orders)</option>
+            </optgroup>
+            <optgroup label="Heterogeneous Source Databases">
+              <option value="19a7185f-f82e-5a63-a060-5f12d55efcbc" data-token="token-pg2-store">PostgreSQL Source 2 (Olist Store a1043baf)</option>
+              <option value="fdc11eea-e9ff-5194-9a87-06bc3e5e16e1" data-token="token-mysql-store">MySQL 8.0 Source (Olist Store 8581055c)</option>
+              <option value="00000000-0000-0044-0000-000000000001" data-token="token-retail-uk">MongoDB Source 1 (UCI Ingestion Bridge)</option>
+            </optgroup>
+          </select>
+        </div>
 
-      <div class="md:col-span-4">
-        <div class="flex items-center justify-between mb-1.5">
-          <label for="tokenInput" class="text-xs uppercase tracking-wider text-slate-400 font-semibold font-mono flex items-center gap-1.5">
-            <span>Bearer Token (Authenticated Context)</span>
-            <div class="relative group cursor-pointer inline-flex items-center">
-              <span class="w-4 h-4 rounded-full bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 text-[10px] font-bold font-mono inline-flex items-center justify-center transition-colors">
-                i
-              </span>
-              <!-- Informational Tooltip / Popover -->
-              <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-80 p-3.5 rounded-xl bg-slate-900 border border-cyan-500/50 shadow-2xl text-[11px] font-sans text-slate-300 z-50 normal-case leading-relaxed">
-                <div class="font-bold font-mono text-cyan-300 text-xs mb-1.5 flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                  <span>Security Architecture Note</span>
-                </div>
-                <p class="mb-2 text-slate-300">
-                  <strong class="text-amber-400">Hackathon Sandbox:</strong> Tokens here are pre-seeded readable strings (e.g. <code class="text-cyan-400 font-mono">token-retail-de</code>) for seamless evaluation and fast context switching across stores.
-                </p>
-                <div class="text-slate-400 border-t border-slate-800 pt-2 text-[10px]">
-                  <strong class="text-emerald-400">Production Standard:</strong> Tokens are never hardcoded. In production, 256-bit cryptographically secure random tokens (<code class="text-slate-300 font-mono">CSPRNG</code>) are generated dynamically, provided confidentially to each tenant via KMS / mTLS, and stored exclusively as one-way SHA-256 hashes in <code class="text-cyan-400 font-mono">api_keys</code>.
+        <div class="md:col-span-4 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="tokenInput" class="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Bearer Token (Auth Context)</span>
+              <!-- Architectural Tooltip -->
+              <div class="relative group cursor-pointer inline-flex items-center">
+                <span class="w-4 h-4 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-[10px] font-bold font-mono inline-flex items-center justify-center transition-colors">
+                  i
+                </span>
+                <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-80 p-3.5 rounded-xl bg-white border border-slate-300 shadow-xl text-xs font-sans text-slate-700 z-50 normal-case leading-relaxed">
+                  <div class="font-bold text-slate-900 text-xs mb-1.5 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    <span>Security Architecture Note</span>
+                  </div>
+                  <p class="mb-2 text-slate-600 text-[11px]">
+                    <strong class="text-amber-700">Hackathon Sandbox:</strong> Pre-seeded human-readable tokens (e.g. <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-800 font-mono">token-retail-de</code>) enable seamless evaluation across merchants without manual secret provisioning.
+                  </p>
+                  <div class="text-slate-600 border-t border-slate-100 pt-2 text-[11px]">
+                    <strong class="text-emerald-700">Production Standard:</strong> Tokens are never hardcoded. In production, 256-bit cryptographically secure pseudorandom tokens (<code class="bg-slate-100 px-1 py-0.5 rounded text-slate-800 font-mono">CSPRNG</code>) are dynamically generated, delivered confidentially to each tenant via KMS / mTLS, and verified strictly as one-way SHA-256 hashes against PostgreSQL row-level context.
+                  </div>
                 </div>
               </div>
-            </div>
-          </label>
+            </label>
+          </div>
+          <div class="relative">
+            <input type="text" id="tokenInput" value="token-retail-uk" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500 transition-colors shadow-xs" />
+            <span class="absolute right-2.5 top-2 text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">SHA-256</span>
+          </div>
         </div>
-        <div class="relative">
-          <input type="text" id="tokenInput" value="token-retail-uk" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors" />
-          <span class="absolute right-2.5 top-2 text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">SHA-256</span>
-        </div>
-      </div>
 
-      <div class="md:col-span-3 flex items-end gap-2">
-        <button onclick="refreshDashboard()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-3 rounded-lg text-xs font-mono transition-colors focus:ring-2 focus:ring-cyan-400 focus:outline-none flex items-center justify-center gap-1.5 cursor-pointer">
-          <svg class="w-3.5 h-3.5 animate-spin hidden" id="refreshSpinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span id="refreshBtnText">Refresh All</span>
-        </button>
-        <button onclick="toggleQuarantine()" id="quarantineBtn" title="Simulate Security Quarantine" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-lg text-xs font-mono transition-colors cursor-pointer">
-          Quarantine
-        </button>
+        <div class="md:col-span-3 flex items-center gap-2">
+          <button onclick="refreshDashboard()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-3.5 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+            <svg class="w-3.5 h-3.5 animate-spin hidden" id="refreshSpinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+            <span id="refreshBtnText">Refresh All</span>
+          </button>
+          <button onclick="toggleQuarantine()" id="quarantineBtn" title="Simulate Security Quarantine" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer shadow-sm">
+            Quarantine
+          </button>
+        </div>
       </div>
     </section>
 
-    <!-- Navigation Tabs -->
-    <nav class="p-1 rounded-lg bg-slate-900 border border-slate-800 flex flex-wrap gap-1" role="tablist">
-      <button onclick="switchTab('overview')" id="tab-overview" role="tab" aria-selected="true" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-cyan-600 text-white cursor-pointer">
+    <!-- Navigation Tabs (Segmented Control) -->
+    <nav class="p-1 rounded-lg bg-slate-200/70 border border-slate-200 flex flex-wrap gap-1" role="tablist">
+      <button onclick="switchTab('overview')" id="tab-overview" role="tab" aria-selected="true" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold bg-white text-slate-900 shadow-xs border border-slate-200/80 cursor-pointer">
         Sales Overview
       </button>
-      <button onclick="switchTab('trends')" id="tab-trends" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+      <button onclick="switchTab('trends')" id="tab-trends" role="tab" aria-selected="false" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer">
         Revenue Trends
       </button>
-      <button onclick="switchTab('products')" id="tab-products" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+      <button onclick="switchTab('products')" id="tab-products" role="tab" aria-selected="false" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer">
         Top Products
       </button>
-      <button onclick="switchTab('breakdown')" id="tab-breakdown" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+      <button onclick="switchTab('breakdown')" id="tab-breakdown" role="tab" aria-selected="false" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer">
         Lifecycle Breakdown
       </button>
-      <button onclick="switchTab('stream')" id="tab-stream" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+      <button onclick="switchTab('stream')" id="tab-stream" role="tab" aria-selected="false" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer">
         CDC Outbox Injection
       </button>
-      <button onclick="switchTab('security')" id="tab-security" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+      <button onclick="switchTab('security')" id="tab-security" role="tab" aria-selected="false" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer">
         Security Gateway
       </button>
-      <button onclick="switchTab('api')" id="tab-api" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+      <button onclick="switchTab('api')" id="tab-api" role="tab" aria-selected="false" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer">
         API Console
       </button>
-      <button onclick="switchTab('telemetry')" id="tab-telemetry" role="tab" aria-selected="false" class="tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 border border-cyan-800/40 ml-auto cursor-pointer">
+      <button onclick="switchTab('telemetry')" id="tab-telemetry" role="tab" aria-selected="false" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 ml-auto transition-colors cursor-pointer">
         Live Telemetry
       </button>
     </nav>
 
     <!-- Main Content Views -->
-    <main id="contentArea" class="space-y-5" role="main">
+    <main id="contentArea" class="space-y-6" role="main">
 
       <!-- 1. SALES OVERVIEW VIEW -->
-      <section id="view-overview" class="tab-view block space-y-4">
+      <section id="view-overview" class="tab-view block space-y-6">
         <!-- Metric Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
-            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Completed Orders</span>
-            <div id="cardOrderCount" class="text-2xl font-bold mt-1 text-white font-mono tabular-nums">--</div>
-            <div class="text-[11px] text-emerald-400 mt-1.5 font-mono flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Authoritative Snapshot
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span class="text-[11px] uppercase font-semibold text-slate-500 tracking-wider">Completed Orders</span>
+            <div id="cardOrderCount" class="text-2xl font-bold mt-1 text-slate-900 font-mono tabular-nums">--</div>
+            <div class="text-[11px] text-emerald-700 mt-2 font-medium flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Authoritative Snapshot
             </div>
           </div>
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
-            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Total Sales Volume</span>
-            <div id="cardSalesPaise" class="text-2xl font-bold mt-1 text-emerald-400 font-mono tabular-nums">--</div>
-            <div class="text-[11px] text-slate-400 mt-1.5 font-mono">
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span class="text-[11px] uppercase font-semibold text-slate-500 tracking-wider">Total Sales Volume</span>
+            <div id="cardSalesPaise" class="text-2xl font-bold mt-1 text-slate-900 font-mono tabular-nums">--</div>
+            <div class="text-[11px] text-slate-500 mt-2">
               Aggregated Minor Units &rarr; INR
             </div>
           </div>
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
-            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Measured Query Latency</span>
-            <div id="cardLatency" class="text-2xl font-bold mt-1 text-cyan-300 font-mono tabular-nums">-- ms</div>
-            <div class="text-[11px] text-emerald-400 mt-1.5 font-mono">
-              Target: &lt; 200 ms (Met)
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span class="text-[11px] uppercase font-semibold text-slate-500 tracking-wider">Measured Serving Latency</span>
+            <div id="cardLatency" class="text-2xl font-bold mt-1 text-blue-600 font-mono tabular-nums">-- ms</div>
+            <div class="text-[11px] text-emerald-700 mt-2 font-medium">
+              SLA &lt; 200 ms (Met Under RLS)
             </div>
           </div>
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
-            <span class="text-[11px] uppercase font-mono font-medium text-slate-400 tracking-wider">Rollup Watermark</span>
-            <div id="cardFreshness" class="text-sm font-bold mt-2 text-slate-200 font-mono truncate">--</div>
-            <div id="cardFreshnessLag" class="text-[11px] text-cyan-400 mt-1.5 font-mono">
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span class="text-[11px] uppercase font-semibold text-slate-500 tracking-wider">Rollup Watermark</span>
+            <div id="cardFreshness" class="text-sm font-bold mt-2 text-slate-800 font-mono truncate">--</div>
+            <div id="cardFreshnessLag" class="text-[11px] text-slate-500 mt-2">
               CDC Replication Lag: &lt; 20 ms
             </div>
           </div>
         </div>
 
         <!-- Embedded Revenue Trend Section on Overview -->
-        <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+        <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
             <div>
-              <h2 class="text-sm font-bold text-white font-mono">
+              <h2 class="text-sm font-bold text-slate-900">
                 Daily Gross Revenue &amp; Order Volume Trend
               </h2>
-              <p class="text-xs text-slate-400 font-mono mt-0.5">
+              <p class="text-xs text-slate-500 mt-0.5">
                 Dynamically rolled up from analytical bucket tables with zero OLTP source lock contention.
               </p>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] text-slate-400 font-mono hidden sm:inline">Grain:</span>
-              <button onclick="setTrendGrain('day')" id="grain-day" class="px-2.5 py-1 rounded text-xs font-mono bg-cyan-600 text-white cursor-pointer">Daily</button>
-              <button onclick="setTrendGrain('hour')" id="grain-hour" class="px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer">Hourly</button>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs text-slate-500 font-medium hidden sm:inline mr-1">Grain:</span>
+              <button onclick="setTrendGrain('day')" id="grain-day" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-900 text-white cursor-pointer shadow-xs">Daily</button>
+              <button onclick="setTrendGrain('hour')" id="grain-hour" class="px-2.5 py-1 rounded-md text-xs font-medium bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 cursor-pointer">Hourly</button>
             </div>
           </div>
 
           <!-- Trend Summary KPI Strip -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
-            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
-              <span class="text-[10px] uppercase text-slate-500">Period Sales</span>
-              <div id="trendTotalSales" class="text-sm font-bold text-emerald-400 mt-0.5 tabular-nums">--</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200/70">
+              <span class="text-[10px] uppercase font-semibold text-slate-500">Period Sales</span>
+              <div id="trendTotalSales" class="text-sm font-bold text-slate-900 font-mono mt-0.5 tabular-nums">--</div>
             </div>
-            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
-              <span class="text-[10px] uppercase text-slate-500">Period Orders</span>
-              <div id="trendTotalOrders" class="text-sm font-bold text-slate-200 mt-0.5 tabular-nums">--</div>
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200/70">
+              <span class="text-[10px] uppercase font-semibold text-slate-500">Period Orders</span>
+              <div id="trendTotalOrders" class="text-sm font-bold text-slate-900 font-mono mt-0.5 tabular-nums">--</div>
             </div>
-            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
-              <span class="text-[10px] uppercase text-slate-500">Peak Day Sales</span>
-              <div id="trendPeakSales" class="text-sm font-bold text-cyan-300 mt-0.5 tabular-nums truncate">--</div>
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200/70">
+              <span class="text-[10px] uppercase font-semibold text-slate-500">Peak Day Sales</span>
+              <div id="trendPeakSales" class="text-sm font-bold text-blue-700 font-mono mt-0.5 tabular-nums truncate">--</div>
             </div>
-            <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80">
-              <span class="text-[10px] uppercase text-slate-500">Daily Average</span>
-              <div id="trendAvgSales" class="text-sm font-bold text-slate-200 mt-0.5 tabular-nums">--</div>
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200/70">
+              <span class="text-[10px] uppercase font-semibold text-slate-500">Daily Average</span>
+              <div id="trendAvgSales" class="text-sm font-bold text-slate-900 font-mono mt-0.5 tabular-nums">--</div>
             </div>
           </div>
 
           <!-- Responsive SVG Vector Trend Canvas -->
           <div id="chartContainer" class="w-full pt-2">
-            <div class="h-64 flex items-center justify-center text-xs font-mono text-slate-500">
+            <div class="h-64 flex items-center justify-center text-xs text-slate-400">
               Loading trend rollups...
             </div>
           </div>
@@ -261,17 +282,17 @@
       </section>
 
       <!-- 2. DEEP-DIVE REVENUE TRENDS VIEW -->
-      <section id="view-trends" class="tab-view hidden space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <section id="view-trends" class="tab-view hidden space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 class="text-base font-bold text-white font-mono">Revenue Trends &amp; Bucket Aggregation</h2>
-            <p class="text-xs text-slate-400 font-mono mt-0.5">
+            <h2 class="text-base font-bold text-slate-900">Revenue Trends &amp; Bucket Aggregation</h2>
+            <p class="text-xs text-slate-500 mt-0.5">
               Authoritatively calculated across `agg_hourly_status` rollups with instant sub-5ms multi-tenant query execution.
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <label for="trendStatusFilter" class="text-xs text-slate-400 font-mono">Status:</label>
-            <select id="trendStatusFilter" onchange="onStatusFilterChange()" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white font-mono cursor-pointer">
+            <label for="trendStatusFilter" class="text-xs text-slate-600 font-medium">Status Filter:</label>
+            <select id="trendStatusFilter" onchange="onStatusFilterChange()" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-slate-900/10 focus:outline-none cursor-pointer shadow-xs">
               <option value="completed" selected>Completed Orders Only</option>
               <option value="all">All Lifecycles (Pending + Cancelled + Completed)</option>
               <option value="cancelled">Cancelled Only</option>
@@ -280,9 +301,9 @@
           </div>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-4">
+        <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-4">
           <div id="chartContainerDeep" class="w-full">
-            <div class="h-64 flex items-center justify-center text-xs font-mono text-slate-500">
+            <div class="h-64 flex items-center justify-center text-xs text-slate-400">
               Loading trend rollups...
             </div>
           </div>
@@ -290,184 +311,191 @@
       </section>
 
       <!-- 3. TOP PRODUCTS VIEW -->
-      <section id="view-products" class="tab-view hidden space-y-4">
+      <section id="view-products" class="tab-view hidden space-y-5">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-base font-bold text-white font-mono">Top Products by Revenue</h2>
-            <p class="text-xs text-slate-400 font-mono mt-0.5">
+            <h2 class="text-base font-bold text-slate-900">Top Products by Gross Revenue</h2>
+            <p class="text-xs text-slate-500 mt-0.5">
               Ranked across `agg_hourly_product` rollups with deterministic tie-breaking.
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <label for="topNLimit" class="text-xs text-slate-400 font-mono">Limit:</label>
-            <select id="topNLimit" onchange="fetchTopProductsData()" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white font-mono cursor-pointer">
-              <option value="5">Top 5</option>
-              <option value="10" selected>Top 10</option>
-              <option value="20">Top 20</option>
+            <label for="topNLimit" class="text-xs text-slate-600 font-medium">Display Limit:</label>
+            <select id="topNLimit" onchange="fetchTopProductsData()" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-slate-900/10 focus:outline-none cursor-pointer shadow-xs">
+              <option value="5">Top 5 Products</option>
+              <option value="10" selected>Top 10 Products</option>
+              <option value="20">Top 20 Products</option>
             </select>
           </div>
         </div>
-        <div class="rounded-xl bg-slate-900/70 border border-slate-800 overflow-hidden">
-          <table class="w-full text-left text-sm font-mono">
-            <thead class="bg-slate-950 text-xs uppercase text-slate-400 border-b border-slate-800">
+        <div class="rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 border-b border-slate-200 font-semibold">
               <tr>
-                <th class="px-5 py-3">Rank &amp; Product Code</th>
-                <th class="px-5 py-3">Inferred Category</th>
-                <th class="px-5 py-3 text-right">Units Sold</th>
-                <th class="px-5 py-3 text-right">Gross Sales (INR)</th>
+                <th class="px-5 py-3.5">Rank &amp; Product Identifier</th>
+                <th class="px-5 py-3.5">Inferred Category</th>
+                <th class="px-5 py-3.5 text-right">Units Sold</th>
+                <th class="px-5 py-3.5 text-right">Gross Sales (INR)</th>
               </tr>
             </thead>
-            <tbody id="topProductsTableBody" class="divide-y divide-slate-800 text-xs">
-              <tr><td colspan="4" class="px-5 py-4 text-center text-slate-500">Loading products...</td></tr>
+            <tbody id="topProductsTableBody" class="divide-y divide-slate-100 text-xs">
+              <tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">Loading products...</td></tr>
             </tbody>
           </table>
         </div>
       </section>
 
       <!-- 4. CATEGORY BREAKDOWN VIEW -->
-      <section id="view-breakdown" class="tab-view hidden space-y-4">
+      <section id="view-breakdown" class="tab-view hidden space-y-6">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Lifecycle &amp; Category Breakdown</h2>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">Multi-dimensional lifecycle breakdown across order statuses and product departments.</p>
+          <h2 class="text-base font-bold text-slate-900">Lifecycle &amp; Department Breakdown</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Multi-dimensional breakdown across order states and product categories.</p>
         </div>
 
-        <div class="space-y-2">
-          <h3 class="text-xs uppercase font-mono font-semibold text-slate-400 tracking-wider">Order Status Distribution</h3>
+        <div class="space-y-3">
+          <h3 class="text-xs uppercase font-semibold text-slate-500 tracking-wider">Order Status Distribution</h3>
           <div id="statusBreakdownGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-500">Loading...</div>
+            <div class="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-400">Loading...</div>
           </div>
         </div>
 
-        <div class="space-y-2 pt-2">
-          <h3 class="text-xs uppercase font-mono font-semibold text-slate-400 tracking-wider">Product Department Distribution</h3>
-          <div id="categoryBreakdownGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-500">Loading...</div>
+        <div class="space-y-3 pt-2">
+          <h3 class="text-xs uppercase font-semibold text-slate-500 tracking-wider">Product Department Distribution</h3>
+          <div id="categoryBreakdownGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-400">Loading...</div>
           </div>
         </div>
       </section>
 
       <!-- 5. LIVE CDC OUTBOX INGESTION STREAM -->
-      <section id="view-stream" class="tab-view hidden space-y-4">
+      <section id="view-stream" class="tab-view hidden space-y-6">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Live Ingestion &amp; CDC Trigger Simulation</h2>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">
+          <h2 class="text-base font-bold text-slate-900">Live Ingestion &amp; CDC Trigger Simulation</h2>
+          <p class="text-xs text-slate-500 mt-0.5">
             Inject mutations directly into the active source database. Demonstrates atomic outbox triggers and snapshot rollup recomputations.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
-            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">1. Insert New Order Transaction</h3>
-            <div class="space-y-2 font-mono text-xs">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-4">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">1. Insert New Order Transaction</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Fires PostgreSQL outbox trigger and updates rollups in real-time.</p>
+            </div>
+            <div class="space-y-3 text-xs">
               <div>
-                <label class="block text-slate-400 mb-1">Product Identifier</label>
-                <input id="liveProdId" type="text" value="PROD-LIVE-COMMERCE" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-1.5 text-slate-200" />
+                <label class="block font-medium text-slate-700 mb-1">Product Identifier</label>
+                <input id="liveProdId" type="text" value="PROD-LIVE-COMMERCE" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:ring-2 focus:ring-slate-900/10 focus:outline-none" />
               </div>
               <div>
-                <label class="block text-slate-400 mb-1">Order Amount (INR)</label>
-                <input id="liveAmountInr" type="number" value="4999" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-1.5 text-slate-200" />
+                <label class="block font-medium text-slate-700 mb-1">Order Amount (INR)</label>
+                <input id="liveAmountInr" type="number" value="4999" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:ring-2 focus:ring-slate-900/10 focus:outline-none" />
               </div>
-              <button onclick="injectLiveOrder()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded transition-colors cursor-pointer mt-2">
-                Commit Order into Source DB
+              <button onclick="injectLiveOrder()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg transition-colors cursor-pointer shadow-sm">
+                Commit Order into Source Database
               </button>
             </div>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
-            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">2. Mutate Order Status (Anti-Delta Recompute)</h3>
-            <p class="text-xs text-slate-400 font-mono">
-              Simulates a cancellation or refund. The system marks the affected bucket dirty and recomputes the authoritative snapshot rather than applying fragile deltas.
-            </p>
-            <button onclick="mutateOrderStatus()" class="w-full bg-rose-600/80 hover:bg-rose-600 text-white font-bold py-2 px-3 rounded font-mono text-xs transition-colors cursor-pointer mt-4">
-              Trigger Status Mutation &rarr; CANCELLED
-            </button>
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-4">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">2. Mutate Order Status (Anti-Delta Recompute)</h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Simulates an asynchronous cancellation or refund event. The system authoritatively marks the hourly bucket dirty and recalculates from scratch instead of relying on fragile blind delta math.
+              </p>
+            </div>
+            <div class="pt-6">
+              <button onclick="mutateOrderStatus()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-medium py-2.5 px-4 rounded-lg text-xs transition-colors cursor-pointer shadow-xs">
+                Trigger Status Mutation &rarr; CANCELLED
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- 6. STORE ISOLATION GATEWAY & DEFENSE PROOFS -->
-      <section id="view-security" class="tab-view hidden space-y-4">
+      <section id="view-security" class="tab-view hidden space-y-6">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Multi-Tenant Isolation &amp; INC-02 Attack Suite</h2>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">
+          <h2 class="text-base font-bold text-slate-900">Multi-Tenant Isolation &amp; INC-02 Attack Suite</h2>
+          <p class="text-xs text-slate-500 mt-0.5">
             Empirical verification of PostgreSQL Kernel Row-Level Security (`FORCE RLS`) and token authentication barriers.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-2">
-            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">Cross-Tenant Probe (IDOR Defense)</h3>
-            <p class="text-xs text-slate-400 font-mono">
-              Attempts to read Tenant #2 data using Tenant #1 credentials. Verified to return 404 Not Found without leaking existence.
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">Cross-Tenant Probe (IDOR Defense)</h3>
+            <p class="text-xs text-slate-500">
+              Attempts to read Tenant #2 data using Tenant #1 credentials. Verified to return 404 Not Found without leaking store existence.
             </p>
-            <button onclick="runIdorAttack()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono py-2 px-3 rounded border border-slate-700 cursor-pointer">
+            <button onclick="runIdorAttack()" class="bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium py-2 px-3.5 rounded-lg border border-slate-300 cursor-pointer shadow-sm">
               Execute Cross-Tenant Probe
             </button>
-            <div id="idorOutput" class="hidden p-3 rounded bg-slate-950 font-mono text-xs text-slate-300 border border-slate-800 mt-2"></div>
+            <div id="idorOutput" class="hidden p-3.5 rounded-lg bg-emerald-50 text-emerald-900 font-mono text-xs border border-emerald-200 mt-2"></div>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-2">
-            <h3 class="text-xs font-bold uppercase font-mono text-white tracking-wider">Zero-Auth Probe (Gateway Barrier)</h3>
-            <p class="text-xs text-slate-400 font-mono">
+          <div class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">Zero-Auth Probe (Gateway Barrier)</h3>
+            <p class="text-xs text-slate-500">
               Invokes analytical query endpoints without Authorization headers. Blocks immediately at Axum middleware layer before acquiring DB connection.
             </p>
-            <button onclick="runNoAuthProbe()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono py-2 px-3 rounded border border-slate-700 cursor-pointer">
+            <button onclick="runNoAuthProbe()" class="bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium py-2 px-3.5 rounded-lg border border-slate-300 cursor-pointer shadow-sm">
               Execute Zero-Auth Probe
             </button>
-            <div id="noAuthOutput" class="hidden p-3 rounded bg-slate-950 font-mono text-xs text-slate-300 border border-slate-800 mt-2"></div>
+            <div id="noAuthOutput" class="hidden p-3.5 rounded-lg bg-emerald-50 text-emerald-900 font-mono text-xs border border-emerald-200 mt-2"></div>
           </div>
         </div>
       </section>
 
       <!-- 7. API CONSOLE VIEW -->
-      <section id="view-api" class="tab-view hidden space-y-4">
+      <section id="view-api" class="tab-view hidden space-y-5">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">REST API Explorer &amp; Command Generation</h2>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">Copy and run real cURL commands authenticated against the local daemon.</p>
+          <h2 class="text-base font-bold text-slate-900">REST API Explorer &amp; Command Generation</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Copy and run real cURL commands authenticated against the local daemon.</p>
         </div>
 
-        <div class="flex items-center gap-1.5 font-mono text-xs">
-          <button onclick="selectApiSnippet('count')" id="btn-snip-count" class="px-3 py-1.5 rounded-lg bg-cyan-600 text-white cursor-pointer">GET /orders/count</button>
-          <button onclick="selectApiSnippet('trend')" id="btn-snip-trend" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white cursor-pointer">GET /orders/trend</button>
-          <button onclick="selectApiSnippet('top')" id="btn-snip-top" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white cursor-pointer">GET /products/top</button>
-          <button onclick="selectApiSnippet('breakdown')" id="btn-snip-breakdown" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white cursor-pointer">GET /orders/breakdown</button>
+        <div class="flex items-center gap-1.5 text-xs">
+          <button onclick="selectApiSnippet('count')" id="btn-snip-count" class="px-3.5 py-1.5 rounded-md font-semibold bg-slate-900 text-white cursor-pointer shadow-xs">GET /orders/count</button>
+          <button onclick="selectApiSnippet('trend')" id="btn-snip-trend" class="px-3.5 py-1.5 rounded-md font-medium bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 cursor-pointer">GET /orders/trend</button>
+          <button onclick="selectApiSnippet('top')" id="btn-snip-top" class="px-3.5 py-1.5 rounded-md font-medium bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 cursor-pointer">GET /products/top</button>
+          <button onclick="selectApiSnippet('breakdown')" id="btn-snip-breakdown" class="px-3.5 py-1.5 rounded-md font-medium bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 cursor-pointer">GET /orders/breakdown</button>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 relative">
-          <pre id="curlCommand" class="font-mono text-xs text-cyan-300 overflow-x-auto select-all"></pre>
-          <button onclick="copyCurl()" class="absolute right-3 top-3 px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] font-mono text-slate-300 rounded border border-slate-700 cursor-pointer">
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 relative shadow-sm">
+          <pre id="curlCommand" class="font-mono text-xs text-slate-100 overflow-x-auto select-all leading-relaxed"></pre>
+          <button onclick="copyCurl()" class="absolute right-3.5 top-3.5 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] font-mono text-slate-200 rounded border border-slate-700 cursor-pointer">
             Copy cURL
           </button>
         </div>
       </section>
 
       <!-- 8. SYSTEM TELEMETRY VIEW -->
-      <section id="view-telemetry" class="tab-view hidden space-y-4">
+      <section id="view-telemetry" class="tab-view hidden space-y-5">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Performance &amp; Response Telemetry</h2>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">Live execution telemetry captured from the latest API roundtrip.</p>
+          <h2 class="text-base font-bold text-slate-900">Performance &amp; Response Telemetry</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Live execution telemetry captured from the latest API roundtrip.</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-            <span class="text-slate-400">Response Code:</span>
-            <div id="telHttpStatus" class="text-sm font-bold text-white mt-1">--</div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span class="text-xs font-medium text-slate-500">Response Code:</span>
+            <div id="telHttpStatus" class="text-base font-bold text-slate-900 font-mono mt-1">--</div>
           </div>
-          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-            <span class="text-slate-400">Roundtrip Latency:</span>
-            <div id="telLatency" class="text-sm font-bold text-cyan-400 mt-1">--</div>
+          <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span class="text-xs font-medium text-slate-500">Roundtrip Latency:</span>
+            <div id="telLatency" class="text-base font-bold text-blue-600 font-mono mt-1">--</div>
           </div>
-          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-            <span class="text-slate-400">SLA Evaluation:</span>
-            <div id="telTargetStatus" class="text-sm font-bold text-emerald-400 mt-1">--</div>
+          <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span class="text-xs font-medium text-slate-500">SLA Evaluation:</span>
+            <div id="telTargetStatus" class="text-base font-bold text-emerald-700 font-mono mt-1">--</div>
           </div>
         </div>
 
         <div class="space-y-2">
-          <button onclick="toggleRawJson()" id="rawJsonBtn" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 cursor-pointer">
+          <button onclick="toggleRawJson()" id="rawJsonBtn" class="text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer">
             [+ Expand Response JSON Payload]
           </button>
-          <div id="rawJsonViewer" class="hidden p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 max-h-80 overflow-y-auto">
+          <div id="rawJsonViewer" class="hidden p-4 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs text-slate-200 max-h-80 overflow-y-auto">
             <pre id="rawJsonContent"></pre>
           </div>
         </div>
@@ -476,12 +504,12 @@
     </main>
 
     <!-- Operational Audit & Telemetry Console -->
-    <footer class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs space-y-1.5" role="contentinfo">
-      <div class="flex items-center justify-between text-[11px] text-slate-500 pb-1.5 border-b border-slate-800/80">
-        <span>LIVE TELEMETRY &bull; REPLICATION LOG</span>
-        <button onclick="document.getElementById('liveConsoleLog').innerHTML=''" class="hover:text-slate-300 cursor-pointer">Clear</button>
+    <footer class="p-4 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2 shadow-sm" role="contentinfo">
+      <div class="flex items-center justify-between text-[11px] text-slate-400 pb-2 border-b border-slate-800">
+        <span class="font-semibold tracking-wider uppercase text-slate-300">LIVE TELEMETRY &bull; REPLICATION LOG</span>
+        <button onclick="document.getElementById('liveConsoleLog').innerHTML=''" class="hover:text-slate-100 text-slate-400 cursor-pointer">Clear Log</button>
       </div>
-      <div id="liveConsoleLog" class="h-28 overflow-y-auto space-y-1 text-[11px] text-slate-300 custom-scrollbar select-text"></div>
+      <div id="liveConsoleLog" class="h-28 overflow-y-auto space-y-1 text-[11px] text-slate-300 custom-scrollbar select-text leading-relaxed"></div>
     </footer>
 
   </div>
@@ -505,7 +533,7 @@
 
       const entry = document.createElement('div');
       entry.className = `${colorClass} truncate`;
-      entry.innerHTML = `<span class="text-slate-600">[${time}]</span> ${msg}`;
+      entry.innerHTML = `<span class="text-slate-500">[${time}]</span> ${msg}`;
       box.appendChild(entry);
       box.scrollTop = box.scrollHeight;
     }
@@ -542,12 +570,12 @@
     function switchTab(tabId) {
       currentTab = tabId;
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.className = 'tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer';
+        btn.className = 'tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer';
         btn.setAttribute('aria-selected', 'false');
       });
       const activeBtn = document.getElementById(`tab-${tabId}`);
       if (activeBtn) {
-        activeBtn.className = 'tab-btn px-3 py-1.5 rounded-md text-xs font-mono font-medium bg-cyan-600 text-white cursor-pointer';
+        activeBtn.className = 'tab-btn px-3.5 py-1.5 rounded-md text-xs font-semibold bg-white text-slate-900 shadow-xs border border-slate-200/80 cursor-pointer';
         activeBtn.setAttribute('aria-selected', 'true');
       }
 
@@ -631,8 +659,8 @@
 
     function setTrendGrain(grain) {
       currentGrain = grain;
-      document.getElementById('grain-day').className = grain === 'day' ? 'px-2.5 py-1 rounded text-xs font-mono bg-cyan-600 text-white cursor-pointer' : 'px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer';
-      document.getElementById('grain-hour').className = grain === 'hour' ? 'px-2.5 py-1 rounded text-xs font-mono bg-cyan-600 text-white cursor-pointer' : 'px-2.5 py-1 rounded text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer';
+      document.getElementById('grain-day').className = grain === 'day' ? 'px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-900 text-white cursor-pointer shadow-xs' : 'px-2.5 py-1 rounded-md text-xs font-medium bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 cursor-pointer';
+      document.getElementById('grain-hour').className = grain === 'hour' ? 'px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-900 text-white cursor-pointer shadow-xs' : 'px-2.5 py-1 rounded-md text-xs font-medium bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 cursor-pointer';
       const tenantId = document.getElementById('tenantSelect').value;
       const token = document.getElementById('tokenInput').value;
       fetchTrendData(tenantId, token);
@@ -644,15 +672,14 @@
 
       if (!points || points.length === 0) {
         container.innerHTML = `
-          <div class="h-64 flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-800 rounded-lg bg-slate-950/40 font-mono text-xs">
-            <p class="text-slate-300 font-medium">Zero trend records found in this time range</p>
-            <p class="text-slate-500 mt-1 max-w-sm">No transactions matched status '${currentStatus}'. Try selecting 'All Lifecycles' or switching grain.</p>
+          <div class="h-64 flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-200 rounded-lg bg-slate-50 font-mono text-xs">
+            <p class="text-slate-700 font-medium">Zero trend records found in this time range</p>
+            <p class="text-slate-400 mt-1 max-w-sm">No transactions matched status '${currentStatus}'. Try selecting 'All Lifecycles' or switching grain.</p>
           </div>
         `;
         return;
       }
 
-      // Safe accumulation avoiding stack-overflow
       let maxSales = 0;
       let totalSales = 0;
       let totalOrders = 0;
@@ -672,7 +699,6 @@
 
       const avgSales = Math.round(totalSales / points.length);
 
-      // Update Header KPI strip
       const sTotalSales = document.getElementById('trendTotalSales');
       if (sTotalSales) sTotalSales.innerText = formatINR(totalSales);
       const sTotalOrders = document.getElementById('trendTotalOrders');
@@ -682,7 +708,6 @@
       const sAvgSales = document.getElementById('trendAvgSales');
       if (sAvgSales) sAvgSales.innerText = formatINR(avgSales);
 
-      // Vector Canvas Dimensions
       const width = 1000;
       const height = 240;
       const padLeft = 65;
@@ -698,7 +723,6 @@
         return { x, y, point: p };
       });
 
-      // SVG Paths
       let pathD = `M ${coords[0].x} ${padTop + chartH} L ${coords[0].x} ${coords[0].y}`;
       for (let i = 1; i < coords.length; i++) {
         pathD += ` L ${coords[i].x} ${coords[i].y}`;
@@ -710,14 +734,13 @@
         lineD += ` L ${coords[i].x} ${coords[i].y}`;
       }
 
-      // Y-axis grid lines
       let yAxisHtml = '';
       for (let step = 0; step <= 3; step++) {
         const val = (maxSales * step) / 3;
         const yPos = padTop + chartH - (chartH * step) / 3;
         yAxisHtml += `
-          <line x1="${padLeft}" y1="${yPos}" x2="${width - padRight}" y2="${yPos}" stroke="#1e293b" stroke-dasharray="2 3" stroke-width="1" />
-          <text x="${padLeft - 8}" y="${yPos + 3.5}" fill="#64748b" font-size="9.5" font-family="monospace" text-anchor="end">${formatShortINR(val)}</text>
+          <line x1="${padLeft}" y1="${yPos}" x2="${width - padRight}" y2="${yPos}" stroke="#e2e8f0" stroke-dasharray="2 3" stroke-width="1" />
+          <text x="${padLeft - 8}" y="${yPos + 3.5}" fill="#64748b" font-size="10" font-family="'JetBrains Mono', monospace" text-anchor="end">${formatShortINR(val)}</text>
         `;
       }
 
@@ -732,44 +755,42 @@
           <svg viewBox="0 0 ${width} ${height}" class="w-full h-60 overflow-visible" preserveAspectRatio="none">
             <defs>
               <linearGradient id="grad_${uniqueSuffix}" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.25" />
-                <stop offset="85%" stop-color="#06b6d4" stop-opacity="0.02" />
-                <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
+                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.12" />
+                <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0" />
               </linearGradient>
             </defs>
 
             ${yAxisHtml}
             <path d="${pathD}" fill="url(#grad_${uniqueSuffix})" />
-            <path d="${lineD}" fill="none" stroke="#06b6d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" stroke="#334155" stroke-width="1" />
+            <path d="${lineD}" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" stroke="#cbd5e1" stroke-width="1" />
 
-            <line id="scrubLine_${uniqueSuffix}" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="2 2" class="opacity-0 pointer-events-none" />
-            <circle id="scrubDot_${uniqueSuffix}" cx="0" cy="0" r="4" fill="#38bdf8" stroke="#082f49" stroke-width="1.5" class="opacity-0 pointer-events-none" />
+            <line id="scrubLine_${uniqueSuffix}" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="2 2" class="opacity-0 pointer-events-none" />
+            <circle id="scrubDot_${uniqueSuffix}" cx="0" cy="0" r="4.5" fill="#2563eb" stroke="#ffffff" stroke-width="2" class="opacity-0 pointer-events-none" />
           </svg>
 
           <div id="chartOverlay_${uniqueSuffix}" class="absolute inset-0 cursor-crosshair"></div>
 
-          <div id="tooltip_${uniqueSuffix}" class="absolute pointer-events-none opacity-0 transition-opacity px-2.5 py-1.5 rounded bg-slate-950/95 border border-slate-700 text-xs font-mono text-white shadow-xl z-30 transform -translate-x-1/2 -translate-y-full mb-2">
-            <div id="tipDate_${uniqueSuffix}" class="text-cyan-400 font-semibold mb-0.5"></div>
-            <div class="flex items-center justify-between gap-3 text-slate-300 text-[11px]">
+          <div id="tooltip_${uniqueSuffix}" class="absolute pointer-events-none opacity-0 transition-opacity px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-white shadow-xl z-30 transform -translate-x-1/2 -translate-y-full mb-2">
+            <div id="tipDate_${uniqueSuffix}" class="text-blue-400 font-semibold mb-0.5"></div>
+            <div class="flex items-center justify-between gap-4 text-slate-300 text-[11px]">
               <span>Gross Sales:</span>
               <span id="tipSales_${uniqueSuffix}" class="font-bold text-emerald-400"></span>
             </div>
-            <div class="flex items-center justify-between gap-3 text-slate-300 text-[11px]">
+            <div class="flex items-center justify-between gap-4 text-slate-300 text-[11px]">
               <span>Orders:</span>
               <span id="tipOrders_${uniqueSuffix}" class="font-bold text-slate-200"></span>
             </div>
           </div>
         </div>
 
-        <div class="flex justify-between items-center text-[11px] text-slate-400 font-mono mt-1.5 px-1 pt-1.5 border-t border-slate-800/80">
+        <div class="flex justify-between items-center text-[11px] text-slate-500 font-mono mt-2 px-1 pt-2 border-t border-slate-100">
           <span>Start: ${firstDate}</span>
-          <span class="text-slate-500 hidden sm:inline">Mid: ${midDate}</span>
+          <span class="text-slate-400 hidden sm:inline">Mid: ${midDate}</span>
           <span>End: ${lastDate}</span>
         </div>
       `;
 
-      // Interactive Scrubber Event Handlers
       const overlay = document.getElementById(`chartOverlay_${uniqueSuffix}`);
       const line = document.getElementById(`scrubLine_${uniqueSuffix}`);
       const dot = document.getElementById(`scrubDot_${uniqueSuffix}`);
@@ -833,21 +854,21 @@
         tbody.innerHTML = '';
 
         if (!data.top_products || data.top_products.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-4 text-center text-slate-500">No product records found for merchant</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No product records found for merchant</td></tr>';
           return;
         }
 
         data.top_products.forEach((p, idx) => {
           const row = document.createElement('tr');
-          row.className = 'hover:bg-slate-800/40 transition-colors';
+          row.className = 'hover:bg-slate-50 transition-colors';
           row.innerHTML = `
-            <td class="px-5 py-2.5 font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-4 h-4 rounded bg-slate-800 text-cyan-400 text-[10px] flex items-center justify-center font-bold">#${idx + 1}</span>
+            <td class="px-5 py-3 font-medium text-slate-900 flex items-center gap-2 font-mono">
+              <span class="w-5 h-5 rounded bg-slate-100 text-slate-700 text-[11px] flex items-center justify-center font-bold">#${idx + 1}</span>
               ${p.product_id}
             </td>
-            <td class="px-5 py-2.5 text-slate-400">${p.category || 'general'}</td>
-            <td class="px-5 py-2.5 text-right text-slate-300 font-bold">${p.units.toLocaleString()}</td>
-            <td class="px-5 py-2.5 text-right text-emerald-400 font-bold">${formatINR(p.total_sales_paise)}</td>
+            <td class="px-5 py-3 text-slate-600 capitalize">${p.category || 'general'}</td>
+            <td class="px-5 py-3 text-right text-slate-800 font-mono font-semibold">${p.units.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right text-emerald-700 font-mono font-bold">${formatINR(p.total_sales_paise)}</td>
           `;
           tbody.appendChild(row);
         });
@@ -874,16 +895,16 @@
         if (data.by_status && data.by_status.length > 0) {
           data.by_status.forEach(item => {
             const card = document.createElement('div');
-            card.className = 'p-3 rounded-lg bg-slate-950 border border-slate-800';
+            card.className = 'p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.03)]';
             card.innerHTML = `
-              <span class="text-[10px] uppercase font-mono font-medium text-slate-400 tracking-wider">${item.status}</span>
-              <div class="text-base font-bold text-white font-mono mt-0.5">${item.order_count.toLocaleString()}</div>
-              <div class="text-[11px] text-emerald-400 font-mono mt-0.5">${formatINR(item.total_sales_paise)}</div>
+              <span class="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">${item.status}</span>
+              <div class="text-base font-bold text-slate-900 font-mono mt-1">${item.order_count.toLocaleString()} orders</div>
+              <div class="text-xs font-semibold text-emerald-700 font-mono mt-0.5">${formatINR(item.total_sales_paise)}</div>
             `;
             sGrid.appendChild(card);
           });
         } else {
-          sGrid.innerHTML = '<div class="text-xs text-slate-500 font-mono">No status breakdown data.</div>';
+          sGrid.innerHTML = '<div class="text-xs text-slate-400">No status breakdown data.</div>';
         }
 
         const cGrid = document.getElementById('categoryBreakdownGrid');
@@ -891,18 +912,18 @@
         if (data.by_category && data.by_category.length > 0) {
           data.by_category.forEach(item => {
             const row = document.createElement('div');
-            row.className = 'p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between font-mono text-xs';
+            row.className = 'p-3 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex items-center justify-between text-xs';
             row.innerHTML = `
               <div>
-                <p class="font-medium text-slate-200">${item.category}</p>
-                <p class="text-[10px] text-slate-500">${item.units_sold.toLocaleString()} units sold</p>
+                <p class="font-medium text-slate-900 capitalize">${item.category}</p>
+                <p class="text-[11px] text-slate-500 font-mono">${item.units_sold.toLocaleString()} units sold</p>
               </div>
-              <span class="font-bold text-emerald-400">${formatINR(item.total_sales_paise)}</span>
+              <span class="font-bold text-emerald-700 font-mono">${formatINR(item.total_sales_paise)}</span>
             `;
             cGrid.appendChild(row);
           });
         } else {
-          cGrid.innerHTML = '<div class="text-xs text-slate-500 font-mono">No category breakdown data.</div>';
+          cGrid.innerHTML = '<div class="text-xs text-slate-400">No category breakdown data.</div>';
         }
         logConsole(`200 OK — Loaded lifecycle and category breakdown (${elapsed} ms)`, 'success');
       } catch (err) {
@@ -969,8 +990,8 @@
       const body = await res.json().catch(() => ({}));
 
       box.innerHTML = `
-        <span class="text-emerald-400 font-bold">✔ PROBE REPELLED:</span><br/>
-        &bull; HTTP Status: <span class="text-rose-400 font-bold">${res.status} Not Found</span> (Anti-Enumeration 404)<br/>
+        <span class="text-emerald-800 font-bold">✔ PROBE REPELLED:</span><br/>
+        &bull; HTTP Status: <span class="text-rose-700 font-bold">${res.status} Not Found</span> (Anti-Enumeration 404)<br/>
         &bull; Isolation Proof: Store #1 received 0 bytes of Store #2 data under FORCE RLS.
       `;
       logConsole(`IDOR Repelled: 404 Not Found returned (0 bytes leaked)`, 'success');
@@ -986,8 +1007,8 @@
       const body = await res.json().catch(() => ({}));
 
       box.innerHTML = `
-        <span class="text-emerald-400 font-bold">✔ PROBE REPELLED:</span><br/>
-        &bull; HTTP Status: <span class="text-rose-400 font-bold">${res.status} Unauthorized</span> (401)<br/>
+        <span class="text-emerald-800 font-bold">✔ PROBE REPELLED:</span><br/>
+        &bull; HTTP Status: <span class="text-rose-700 font-bold">${res.status} Unauthorized</span> (401)<br/>
         &bull; Gateway Defense: Blocked at middleware layer before database acquisition.
       `;
       logConsole(`Zero-Auth Blocked: 401 Unauthorized`, 'success');
@@ -997,7 +1018,11 @@
       currentSnippet = type;
       ['count', 'trend', 'top', 'breakdown'].forEach(t => {
         const btn = document.getElementById(`btn-snip-${t}`);
-        if (btn) btn.className = t === type ? 'px-3 py-1.5 rounded-lg text-xs font-mono bg-cyan-600 text-white cursor-pointer' : 'px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 text-slate-400 hover:text-white cursor-pointer';
+        if (btn) {
+          btn.className = t === type 
+            ? 'px-3.5 py-1.5 rounded-md text-xs font-semibold bg-slate-900 text-white cursor-pointer shadow-xs' 
+            : 'px-3.5 py-1.5 rounded-md text-xs font-medium bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 cursor-pointer';
+        }
       });
       updateCurlSnippet();
     }
@@ -1023,8 +1048,14 @@
     function recordTelemetry(status, latencyMs, payload) {
       document.getElementById('telLatency').innerText = `${latencyMs} ms`;
       document.getElementById('telHttpStatus').innerText = `${status} ${status === 200 ? 'OK' : 'DENIED'}`;
-      document.getElementById('telTargetStatus').innerText = parseFloat(latencyMs) < 200 ? '< 200 ms (Met)' : 'Target Exceeded';
-      document.getElementById('telTargetStatus').className = parseFloat(latencyMs) < 200 ? 'text-sm font-bold text-emerald-400 mt-1' : 'text-sm font-bold text-amber-400 mt-1';
+      const targetEl = document.getElementById('telTargetStatus');
+      if (parseFloat(latencyMs) < 200) {
+        targetEl.innerText = '< 200 ms (Met Under RLS)';
+        targetEl.className = 'text-base font-bold text-emerald-700 font-mono mt-1';
+      } else {
+        targetEl.innerText = 'Target Exceeded';
+        targetEl.className = 'text-base font-bold text-amber-700 font-mono mt-1';
+      }
       document.getElementById('rawJsonContent').innerText = JSON.stringify(payload, null, 2);
     }
 
@@ -1052,14 +1083,14 @@
         });
         isQuarantined = true;
         btn.innerText = "Lift Quarantine";
-        btn.className = "bg-rose-500/20 text-rose-400 border border-rose-500/50 px-3 py-2 rounded-lg text-xs font-mono transition-colors cursor-pointer";
+        btn.className = "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer shadow-xs";
         logConsole(`Tenant quarantined: Queries will return 503 Service Unavailable`, 'error');
         alert("Tenant quarantined! Future analytics requests will return 503 Service Unavailable.");
       } else {
         await fetch(`${API_BASE}/admin/tenants/${tenantId}/unquarantine`, { method: 'POST' });
         isQuarantined = false;
         btn.innerText = "Quarantine";
-        btn.className = "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-lg text-xs font-mono transition-colors cursor-pointer";
+        btn.className = "bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer shadow-sm";
         logConsole(`Quarantine lifted for tenant`, 'success');
         refreshDashboard();
       }
