@@ -9,30 +9,75 @@ TRON solves the dual challenges of **analytical query performance** (sub-5ms p99
 ## Architecture Overview
 
 ```mermaid
-flowchart TD
-    subgraph Operational_Plane["Operational Database (source_db:5433)"]
-        Orders["orders (10,140,432 rows)"] -->|AFTER INSERT/UPDATE/DELETE| Trigger["trg_orders_bucket_change"]
-        Trigger -->|Dirty Hint: (tenant_id, hour)| Outbox["outbox (buffer)"]
+flowchart TB
+    subgraph SOURCE["1. SOURCE DATABASES"]
+        PG[("PostgreSQL")]
+        MY[("MySQL")]
+        MG[("MongoDB")]
     end
 
-    subgraph Aggregation_Plane["Rust Background Worker"]
-        Outbox -->|FOR UPDATE SKIP LOCKED| Worker["Worker Engine (Batch Size: 1000)"]
-        Worker -->|REPEATABLE READ Snapshot Read| Orders
-        Worker -->|Version-Fenced Conditional Publish| AnalyticsDB
+    subgraph INGEST["2. DATA INGESTION"]
+        AD["Database Adapters"]
+        CAP["Change Capture"]
+        DB[("Dirty Bucket Queue")]
+        AD --> CAP --> DB
     end
 
-    subgraph Analytics_Plane["Analytics Database (analytics_db:5434)"]
-        AnalyticsDB["Rollup Tables: agg_hourly, agg_hourly_product"]
-        RLS["Engine-Level RLS: FORCE ROW LEVEL SECURITY"]
-        AnalyticsDB --- RLS
+    subgraph ENGINE["3. RUST PROCESSING ENGINE"]
+        W["Worker Manager"]
+        R["Read & Recompute"]
+        AG["Aggregation Engine"]
+        W --> R --> AG
     end
 
-    subgraph Serving_Plane["Axum REST API (Port 8080)"]
-        Client["Dashboard Client"] -->|Bearer Token & Zero-Cache| API["Axum API Engine"]
-        API -->|Transaction-Scoped Context (is_local = true)| RLS
-        API -->|api_ro Unprivileged Role| AnalyticsDB
+    subgraph STORAGE["4. ANALYTICS DATABASE"]
+        DATA[("Hourly Aggregates")]
+        ROLL[("Dashboard Rollups")]
+        TEN["Tenant Isolation"]
+        DATA --> ROLL --> TEN
     end
+
+    subgraph API["5. API LAYER"]
+        AX["Axum API"]
+        AUTH["Authentication & Access Control"]
+        AUTH --> AX
+    end
+
+    subgraph USERS["6. CONSUMERS"]
+        DASH["Web Dashboards"]
+        CLIENT["Client Applications"]
+    end
+
+    PG --> AD
+    MY --> AD
+    MG --> AD
+
+    DB --> W
+    AG --> DATA
+
+    TEN --> AX
+    DASH --> AUTH
+    CLIENT --> AUTH
+
+    OBS["Monitoring & Observability"]
+    INGEST -.-> OBS
+    ENGINE -.-> OBS
+    API -.-> OBS
 ```
+
+### End-to-End Execution Sequence
+
+<p align="center">
+  <img src="docs/assets/architecture_sequence.png" alt="TRON Architecture & End-to-End Sequence Diagram" width="100%" />
+</p>
+
+### End-to-End Execution Flow
+1. **Source Transaction:** Customer application commits an order mutation (`INSERT`, `UPDATE`, `DELETE`) in the source database.
+2. **Atomic Trigger Outbox:** The source trigger captures the change and writes a dirty hint `(tenant_id, bucket_hour)` into `_orders_outbox` in the exact same transaction.
+3. **Queue Ingestion:** The capture adapter claims outbox rows and upserts dirty buckets into `Analytics PG: dirty_buckets` with an incrementing sequence number.
+4. **Snapshot Recomputation:** The Rust worker claims the dirty bucket using `FOR UPDATE SKIP LOCKED`, acquires a lease token, opens a `REPEATABLE READ` snapshot on the source, and recomputes the full hourly aggregate.
+5. **Version-Fenced Publish:** The worker publishes the aggregate to Analytics PostgreSQL rollups inside an atomic transaction using advisory locks and version fencing, guaranteeing stale workers can never overwrite fresher data.
+6. **Engine RLS Serving:** The Axum REST API sets `SET LOCAL app.tenant_id = $token` and executes queries with sub-5ms latency under `FORCE ROW LEVEL SECURITY`.
 
 ### Core Architecture Pillars
 
