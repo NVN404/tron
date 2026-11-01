@@ -33,8 +33,12 @@ async fn health_check() -> Json<serde_json::Value> {
     Json(json!({ "status": "healthy", "service": "analytics-api" }))
 }
 
-async fn serve_dashboard() -> Html<&'static str> {
-    Html(include_str!("../static/dashboard.html"))
+async fn serve_ciso() -> Html<&'static str> {
+    Html(include_str!("../static/ciso.html"))
+}
+
+async fn serve_demo() -> Html<&'static str> {
+    Html(include_str!("../static/demo.html"))
 }
 
 pub fn create_app(pool: PgPool) -> Router {
@@ -55,14 +59,23 @@ pub fn create_app(pool: PgPool) -> Router {
         .route("/api/demo/rebuild", axum::routing::post(routes::trigger_demo_rebuild))
         .route("/api/demo/config", get(routes::get_demo_config));
 
+    let ciso_api_routes = Router::new()
+        .route("/api/ciso/posture", get(routes::get_ciso_posture))
+        .route("/api/ciso/tenants", get(routes::get_ciso_tenants))
+        .route("/api/ciso/audit", get(routes::get_ciso_audit_log))
+        .route("/api/ciso/sources", get(routes::get_ciso_sources));
+
     Router::new()
-        .route("/", get(serve_dashboard))
-        .route("/dashboard", get(serve_dashboard))
+        .route("/", get(serve_ciso))
+        .route("/ciso", get(serve_ciso))
+        .route("/demo", get(serve_demo))
+        .route("/dashboard", get(serve_ciso))
         .route("/health", get(health_check))
         .route("/metrics", get(routes::get_metrics))
         .merge(api_routes)
         .merge(admin_routes)
         .merge(demo_routes)
+        .merge(ciso_api_routes)
         .layer(middleware::from_fn(zero_cache_middleware))
         .layer(CorsLayer::permissive())
         .with_state(pool)

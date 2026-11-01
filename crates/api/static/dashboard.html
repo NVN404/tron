@@ -68,15 +68,6 @@
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           RLS: FORCE ENABLED
         </span>
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700">
-          ROLE: api_ro
-        </span>
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700">
-          CACHE: no-store
-        </span>
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
-          DATASET: 1,067,371 REAL ORDERS
-        </span>
       </div>
     </header>
 
@@ -117,9 +108,29 @@
       </div>
 
       <div class="md:col-span-4">
-        <label for="tokenInput" class="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1.5 font-mono">
-          Bearer Token (Authenticated Context)
-        </label>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="tokenInput" class="text-xs uppercase tracking-wider text-slate-400 font-semibold font-mono flex items-center gap-1.5">
+            <span>Bearer Token (Authenticated Context)</span>
+            <div class="relative group cursor-pointer inline-flex items-center">
+              <span class="w-4 h-4 rounded-full bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 text-[10px] font-bold font-mono inline-flex items-center justify-center transition-colors">
+                i
+              </span>
+              <!-- Informational Tooltip / Popover -->
+              <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-80 p-3.5 rounded-xl bg-slate-900 border border-cyan-500/50 shadow-2xl text-[11px] font-sans text-slate-300 z-50 normal-case leading-relaxed">
+                <div class="font-bold font-mono text-cyan-300 text-xs mb-1.5 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                  <span>Security Architecture Note</span>
+                </div>
+                <p class="mb-2 text-slate-300">
+                  <strong class="text-amber-400">Hackathon Sandbox:</strong> Tokens here are pre-seeded readable strings (e.g. <code class="text-cyan-400 font-mono">token-retail-de</code>) for seamless evaluation and fast context switching across stores.
+                </p>
+                <div class="text-slate-400 border-t border-slate-800 pt-2 text-[10px]">
+                  <strong class="text-emerald-400">Production Standard:</strong> Tokens are never hardcoded. In production, 256-bit cryptographically secure random tokens (<code class="text-slate-300 font-mono">CSPRNG</code>) are generated dynamically, provided confidentially to each tenant via KMS / mTLS, and stored exclusively as one-way SHA-256 hashes in <code class="text-cyan-400 font-mono">api_keys</code>.
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
         <div class="relative">
           <input type="text" id="tokenInput" value="token-retail-uk" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors" />
           <span class="absolute right-2.5 top-2 text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">SHA-256</span>

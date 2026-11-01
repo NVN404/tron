@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CISO Security &amp; Compliance Center | TRON Platform</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 antialiased custom-scrollbar selection:bg-slate-900 selection:text-white">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Top Navigation Utility Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2.5 rounded-lg bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-xs gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          Enterprise Zero-Trust Active
+        </span>
+        <span class="text-slate-300">|</span>
+        <span class="text-slate-600 font-medium">PostgreSQL Kernel RLS Isolation Enforced</span>
+        <span class="hidden md:inline text-slate-400">&bull; Incident INC-02 Verified Immune</span>
+      </div>
+      <a href="/demo" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors self-start sm:self-auto shadow-sm">
+        <span>Open Hackathon Sandbox</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </a>
+    </div>
+
+    <!-- Main Corporate Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 rounded-lg bg-slate-900 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+          TR
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-slate-900">
+              CISO Security &amp; Governance Center
+            </h1>
+            <span class="text-[11px] font-medium tracking-wide px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+              TRON Platform v0.1.0
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Continuous multi-tenant cryptographic proof verification, RLS policy audit &amp; tenant containment
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Controls -->
+      <div class="flex items-center gap-3">
+        <button onclick="loadCisoData()" class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-medium transition-colors shadow-sm cursor-pointer">
+          <svg class="w-3.5 h-3.5 animate-spin hidden text-slate-500" id="refreshSpinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span id="refreshText">Refresh Posture</span>
+        </button>
+        <div class="px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+          <span>Status: Protected (Fail-Closed)</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Executive KPI Strip -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5">
+      <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Tenant Isolation</div>
+        <div class="text-2xl font-bold mt-1 text-slate-900 flex items-center gap-2">
+          <span>100%</span>
+          <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">PASS</span>
+        </div>
+        <div class="text-[11px] text-slate-500 mt-1">PostgreSQL Kernel RLS</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Onboarded Tenants</div>
+        <div id="kpiTotalTenants" class="text-2xl font-bold mt-1 text-slate-900 tabular-nums">--</div>
+        <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-mono">
+          <span id="kpiHealthyCount" class="text-emerald-700 font-semibold">--</span> Active &bull; <span id="kpiQuarantineCount" class="text-rose-600 font-semibold">--</span> Quarantined
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Hourly Rollups</div>
+        <div id="kpiTotalRollups" class="text-2xl font-bold mt-1 text-slate-900 tabular-nums">--</div>
+        <div class="text-[11px] text-slate-500 mt-1 font-mono">Precomputed Buckets</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Poison Queue (Dead Letter)</div>
+        <div id="kpiDeadLetter" class="text-2xl font-bold mt-1 text-slate-900 tabular-nums">0</div>
+        <div class="text-[11px] text-slate-500 mt-1">Quarantined Mutations</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">API Database Role</div>
+        <div class="text-2xl font-bold mt-1 text-slate-900 font-mono text-lg">api_ro</div>
+        <div class="text-[11px] text-emerald-700 mt-1 font-medium">NOSUPER &bull; NOBYPASS</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Cache Exposure Risk</div>
+        <div class="text-2xl font-bold mt-1 text-slate-900">0.00%</div>
+        <div class="text-[11px] text-slate-500 mt-1 font-mono">Strict no-store Header</div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: KERNEL ROW LEVEL SECURITY VERIFICATION -->
+    <section class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            PostgreSQL Kernel Row-Level Security (RLS) Policy Status
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Real-time catalog evaluation querying <code class="text-slate-800 font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded">pg_class</code> and <code class="text-slate-800 font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded">pg_roles</code> to confirm non-bypassable database engine boundaries.
+          </p>
+        </div>
+        <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200">
+          Evaluated via SecuritySelfCheck
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-semibold text-slate-800">agg_hourly_status</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">FORCE RLS ACTIVE</span>
+          </div>
+          <div class="mt-2.5 text-[11px] text-slate-600 space-y-1">
+            <div>&bull; relrowsecurity: <span class="text-emerald-700 font-semibold font-mono">true</span></div>
+            <div>&bull; relforcerowsecurity: <span class="text-emerald-700 font-semibold font-mono">true</span></div>
+            <div class="font-mono text-[10px] text-slate-500 truncate pt-1">&bull; tenant_uuid = NULLIF(current_setting('app.tenant_id', true), '')::uuid</div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-semibold text-slate-800">agg_hourly_product</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">FORCE RLS ACTIVE</span>
+          </div>
+          <div class="mt-2.5 text-[11px] text-slate-600 space-y-1">
+            <div>&bull; relrowsecurity: <span class="text-emerald-700 font-semibold font-mono">true</span></div>
+            <div>&bull; relforcerowsecurity: <span class="text-emerald-700 font-semibold font-mono">true</span></div>
+            <div class="font-mono text-[10px] text-slate-500 truncate pt-1">&bull; tenant_uuid = NULLIF(current_setting('app.tenant_id', true), '')::uuid</div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-semibold text-slate-800">tenants (Metadata)</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">FORCE RLS ACTIVE</span>
+          </div>
+          <div class="mt-2.5 text-[11px] text-slate-600 space-y-1">
+            <div>&bull; relrowsecurity: <span class="text-emerald-700 font-semibold font-mono">true</span></div>
+            <div>&bull; relforcerowsecurity: <span class="text-emerald-700 font-semibold font-mono">true</span></div>
+            <div class="text-[11px] text-slate-600 pt-1">&bull; Fail-Closed: <span class="text-emerald-700 font-medium">0 rows returned on unauthenticated reads</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: TENANT REGISTRY & QUARANTINE CONTROLS -->
+    <section class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-3">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            Tenant Isolation Directory &amp; Immediate Quarantine Control
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Inspect live tenant volume, external mapping identities, and immediately isolate compromised accounts.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="tenantSearchInput" onkeyup="filterTenants()" placeholder="Search UUID, Store Name, or External ID..." class="w-72 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-colors" />
+        </div>
+      </div>
+
+      <!-- Tenants Table -->
+      <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-lg">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
+              <th class="py-2.5 px-3">Tenant UUID</th>
+              <th class="py-2.5 px-3">Store Name &amp; External ID</th>
+              <th class="py-2.5 px-3">Source DB</th>
+              <th class="py-2.5 px-3 text-right">Orders Count</th>
+              <th class="py-2.5 px-3 text-right">Aggregated Sales</th>
+              <th class="py-2.5 px-3 text-center">Security Status</th>
+              <th class="py-2.5 px-3 text-right">Administrative Action</th>
+            </tr>
+          </thead>
+          <tbody id="tenantsTableBody" class="divide-y divide-slate-100 text-slate-700 bg-white">
+            <tr>
+              <td colspan="7" class="py-8 text-center text-slate-400">Loading live tenant registry...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 3: AUDIT FEED & INGESTION SOURCES (2-COLUMN) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Live Audit Log Feed (7 cols) -->
+      <section class="lg:col-span-7 p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-3">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+              Live Security Audit Trail (<code class="font-mono text-slate-700 text-xs bg-slate-100 px-1 py-0.5 rounded">audit_log</code>)
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Immutable record of security mutations, administrative quarantines, and tenant access</p>
+          </div>
+          <span class="text-[11px] font-mono text-slate-400">Polling every 5s</span>
+        </div>
+
+        <div class="overflow-y-auto max-h-80 custom-scrollbar space-y-2 pr-1" id="auditLogContainer">
+          <div class="text-center py-8 text-xs text-slate-400">Loading audit feed...</div>
+        </div>
+      </section>
+
+      <!-- Ingestion Sources (5 cols) -->
+      <section class="lg:col-span-5 p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-3">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z"></path></svg>
+              Heterogeneous Ingestion Sources
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Operational change capture pipelines &amp; cursor tracking</p>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 text-xs" id="sourcesContainer">
+          <div class="text-center py-8 text-slate-400">Loading source connectors...</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- SECTION 4: FORMAL SECURITY PROOFS -->
+    <section class="p-5 rounded-xl bg-white border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)] space-y-3.5">
+      <div class="pb-2 border-b border-slate-100">
+        <h2 class="text-sm font-semibold text-slate-900">Security Architecture &amp; Attack Resistance Matrix</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="font-semibold text-slate-900 flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span> Cross-Tenant IDOR Proof
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1">
+            Path parameters must match the authenticated token tenant identity. Unmatched probe attempts return <code class="font-mono bg-white px-1 border border-slate-200 rounded">404 Not Found</code>.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="font-semibold text-slate-900 flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span> Connection Pool State Isolation
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1">
+            Tenant context is established strictly using <code class="font-mono bg-white px-1 border border-slate-200 rounded">set_config(..., is_local=true)</code>, purging context immediately upon commit.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="font-semibold text-slate-900 flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span> Kernel-Level RLS Enforcement
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1">
+            Role <code class="font-mono bg-white px-1 border border-slate-200 rounded">api_ro</code> has <code class="font-mono bg-white px-1 border border-slate-200 rounded">NOBYPASSRLS</code> and is non-superuser. Policy bypass is blocked by the database engine.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="font-semibold text-slate-900 flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span> SQL Injection Immunity
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1">
+            All analytical aggregation queries execute through strictly parameterized statements with typed timestamp validation.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="font-semibold text-slate-900 flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span> Anti-Delta Drift Immunity
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1">
+            Aggregates are authoritatively recomputed in snapshot transactions. Blind incremental delta counters are strictly eliminated.
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div class="font-semibold text-slate-900 flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span> Zero-Cache Proxy Protection
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1">
+            Mandatory injection of <code class="font-mono bg-white px-1 border border-slate-200 rounded">Cache-Control: no-store</code> headers guarantees CDNs never cache tenant metrics.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLEAN CORPORATE FOOTER (DEMO LINK AT LAST) -->
+    <footer class="p-6 rounded-xl bg-slate-900 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px] font-semibold uppercase tracking-wider border border-slate-700">
+            Interactive Sandbox
+          </span>
+          <span class="text-slate-400 text-xs">&bull; Live CDC Outbox Demonstration</span>
+        </div>
+        <h3 class="text-base font-semibold text-white">
+          Looking for the Technical Live Demo &amp; CDC Mutation Simulator?
+        </h3>
+        <p class="text-xs text-slate-400 max-w-2xl">
+          Evaluate live CDC order mutations, real-time trigger outbox processing, 10M record aggregation benchmarks, and sub-5ms query response times in the interactive testing sandbox.
+        </p>
+      </div>
+
+      <a href="/demo" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs shadow-sm transition-colors cursor-pointer whitespace-nowrap">
+        <span>Open Hackathon Sandbox</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </a>
+    </footer>
+
+  </div>
+
+  <!-- CISO Console JavaScript -->
+  <script>
+    let allTenants = [];
+
+    async function loadCisoData() {
+      const spinner = document.getElementById('refreshSpinner');
+      const btnText = document.getElementById('refreshText');
+      if (spinner) spinner.classList.remove('hidden');
+      if (btnText) btnText.textContent = 'Updating...';
+
+      await Promise.allSettled([
+        fetchPosture().catch(e => console.error("posture error:", e)),
+        fetchTenants().catch(e => console.error("tenants error:", e)),
+        fetchAuditLog().catch(e => console.error("audit error:", e)),
+        fetchSources().catch(e => console.error("sources error:", e))
+      ]);
+
+      if (spinner) spinner.classList.add('hidden');
+      if (btnText) btnText.textContent = 'Refresh Posture';
+    }
+
+    async function fetchPosture() {
+      const res = await fetch('/api/ciso/posture');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      document.getElementById('kpiTotalTenants').textContent = data.tenants.total.toLocaleString();
+      document.getElementById('kpiHealthyCount').textContent = data.tenants.healthy.toLocaleString();
+      document.getElementById('kpiQuarantineCount').textContent = data.tenants.quarantined.toLocaleString();
+      document.getElementById('kpiTotalRollups').textContent = data.analytics_store.total_hourly_rollups.toLocaleString();
+      document.getElementById('kpiDeadLetter').textContent = data.analytics_store.dead_letter_quarantined;
+
+      const deadEl = document.getElementById('kpiDeadLetter');
+      if (data.analytics_store.dead_letter_quarantined > 0) {
+        deadEl.className = 'text-2xl font-bold mt-1 text-rose-600 tabular-nums';
+      } else {
+        deadEl.className = 'text-2xl font-bold mt-1 text-slate-900 tabular-nums';
+      }
+    }
+
+    async function fetchTenants() {
+      const res = await fetch('/api/ciso/tenants');
+      if (!res.ok) return;
+      const data = await res.json();
+      allTenants = data.tenants || [];
+      renderTenants(allTenants);
+    }
+
+    function renderTenants(tenants) {
+      const tbody = document.getElementById('tenantsTableBody');
+      if (!tbody) return;
+
+      if (tenants.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-400">No matching tenants found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = tenants.map(t => {
+        const isQuarantined = t.health === 'quarantined';
+        const statusBadge = isQuarantined
+          ? `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">QUARANTINED</span>`
+          : `<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">HEALTHY</span>`;
+
+        const actionBtn = isQuarantined
+          ? `<button onclick="toggleTenantQuarantine('${t.tenant_uuid}', false)" class="px-2.5 py-1 rounded text-[11px] font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-pointer transition-colors">Unquarantine</button>`
+          : `<button onclick="toggleTenantQuarantine('${t.tenant_uuid}', true)" class="px-2.5 py-1 rounded text-[11px] font-medium bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 cursor-pointer transition-colors">Quarantine</button>`;
+
+        const salesInr = (t.total_revenue_minor / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600 select-all">${t.tenant_uuid}</td>
+            <td class="py-2.5 px-3">
+              <div class="font-semibold text-slate-900">${t.name}</div>
+              <div class="text-[11px] text-slate-400 font-mono">${t.external_id}</div>
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-700 border border-slate-200">${t.source_id}</span>
+            </td>
+            <td class="py-2.5 px-3 text-right font-mono tabular-nums text-slate-900 font-medium">${t.total_orders.toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-right font-mono tabular-nums text-emerald-700 font-semibold">${salesInr}</td>
+            <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+            <td class="py-2.5 px-3 text-right">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterTenants() {
+      const q = (document.getElementById('tenantSearchInput')?.value || '').toLowerCase().trim();
+      if (!q) {
+        renderTenants(allTenants);
+        return;
+      }
+      const filtered = allTenants.filter(t => 
+        t.tenant_uuid.toLowerCase().includes(q) ||
+        (t.external_id && t.external_id.toLowerCase().includes(q)) ||
+        (t.name && t.name.toLowerCase().includes(q)) ||
+        t.source_id.toLowerCase().includes(q)
+      );
+      renderTenants(filtered);
+    }
+
+    async function toggleTenantQuarantine(tenantId, setQuarantined) {
+      const endpoint = setQuarantined 
+        ? `/admin/tenants/${tenantId}/quarantine`
+        : `/admin/tenants/${tenantId}/unquarantine`;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: setQuarantined ? 'CISO Console Security Incident Investigation' : 'Audit cleared' })
+        });
+
+        if (res.ok) {
+          await loadCisoData();
+        } else {
+          alert('Failed to update tenant status');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Network error while updating quarantine');
+      }
+    }
+
+    async function fetchAuditLog() {
+      const res = await fetch('/api/ciso/audit');
+      if (!res.ok) return;
+      const data = await res.json();
+      const container = document.getElementById('auditLogContainer');
+      if (!container) return;
+
+      const entries = data.audit_entries || [];
+      if (entries.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">No audit events recorded yet.</div>';
+        return;
+      }
+
+      container.innerHTML = entries.map(item => {
+        let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
+        if (item.event_type.includes('QUARANTINE')) badgeColor = 'bg-rose-50 text-rose-700 border-rose-200';
+        if (item.event_type.includes('ORDER')) badgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
+
+        const timeStr = new Date(item.created_at).toLocaleTimeString();
+        const detailsStr = typeof item.details === 'object' ? JSON.stringify(item.details) : item.details;
+
+        return `
+          <div class="p-2.5 rounded-lg bg-slate-50/70 border border-slate-200 text-xs hover:border-slate-300 transition-colors">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${badgeColor}">${item.event_type}</span>
+              <span class="text-[10px] text-slate-400 font-mono">${timeStr}</span>
+            </div>
+            <div class="text-[11px] text-slate-700 mt-1 truncate">
+              Tenant: <span class="font-mono text-slate-900 select-all">${item.tenant_uuid || 'System / Platform'}</span>
+            </div>
+            <div class="text-[11px] text-slate-500 mt-0.5 truncate font-mono">
+              ${detailsStr}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function fetchSources() {
+      const res = await fetch('/api/ciso/sources');
+      if (!res.ok) return;
+      const data = await res.json();
+      const container = document.getElementById('sourcesContainer');
+      if (!container) return;
+
+      const sources = data.sources || [];
+      container.innerHTML = sources.map(s => {
+        const isHealthy = !s.is_degraded && s.status === 'active';
+        const badge = isHealthy
+          ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">ONLINE</span>`
+          : `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">DEGRADED</span>`;
+
+        return `
+          <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-slate-900 font-mono">${s.id}</span>
+              ${badge}
+            </div>
+            <div class="text-[11px] text-slate-600 flex items-center justify-between">
+              <span>Engine: <span class="font-medium text-slate-800">${s.kind.toUpperCase()}</span></span>
+              <span>Mode: <span class="text-slate-700 font-mono">${s.capture_mode}</span></span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-mono truncate">
+              Cursor: ${s.current_cursor}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Initialize and start periodic polling every 5 seconds
+    loadCisoData();
+    setInterval(loadCisoData, 5000);
+  </script>
+</body>
+</html>

@@ -106,10 +106,21 @@ async fn main() -> Result<()> {
     println!("   MULTI-TENANT AGGREGATION LAYER EMPIRICAL BENCHMARK   ");
     println!("=======================================================\n");
 
-    // Discover top tenant and a mid tenant
-    let top_tenant_id = Uuid::parse_str("00000000-0000-0001-0000-000000000001")?;
-    let test_token = "token-tenant-1";
-    let token_hash = hash_api_key(test_token);
+    // Dynamically discover the real top tenant from the source database (NO HARDCODING)
+    let top_tenant_row: Option<(String, i64)> = sqlx::query_as(
+        "SELECT tenant_id, count(*)::bigint FROM orders GROUP BY tenant_id ORDER BY count(*) DESC LIMIT 1"
+    )
+    .fetch_optional(&source_pool)
+    .await?;
+
+    let (top_tenant_str, top_orders_count) = top_tenant_row
+        .unwrap_or_else(|| ("00000000-0000-0044-0000-000000000001".to_string(), 0));
+
+    let top_tenant_id = Uuid::parse_str(&top_tenant_str)?;
+    let test_token = format!("token-{}", top_tenant_id.simple());
+    let token_hash = hash_api_key(&test_token);
+
+    println!(">>> Dynamic Discovery: Top Tenant is {} with {} orders in Source DB", top_tenant_id, top_orders_count);
 
     // Register tenant and key if not existing
     sqlx::query("INSERT INTO sources (id, kind, capture_mode) VALUES ('pg_source_1', 'postgres', 'outbox') ON CONFLICT DO NOTHING;")
@@ -118,8 +129,8 @@ async fn main() -> Result<()> {
 
     sqlx::query(
         "INSERT INTO tenants (tenant_uuid, source_id, external_id, name, health)
-         VALUES ($1, 'pg_source_1', 'ext_001', 'Tenant Alpha', 'healthy')
-         ON CONFLICT (tenant_uuid) DO NOTHING;"
+         VALUES ($1, 'pg_source_1', 'flagship_store', 'Flagship Tenant', 'healthy')
+         ON CONFLICT (tenant_uuid) DO UPDATE SET health = 'healthy';"
     )
     .bind(top_tenant_id)
     .execute(&analytics_admin_pool)
@@ -136,7 +147,7 @@ async fn main() -> Result<()> {
     .await?;
 
     let now = Utc::now();
-    let from = now - Duration::days(30);
+    let from = Utc.with_ymd_and_hms(2000, 1, 1, 0, 0, 0).unwrap();
     let to = now + Duration::hours(1);
 
     // -------------------------------------------------------------
