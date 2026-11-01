@@ -1,40 +1,63 @@
-use api::{create_app, hash_api_key, self_check::SecuritySelfCheck};
+use api::{create_app, hash_api_key};
 use axum::{
     body::{to_bytes, Body},
     http::{header, Request, StatusCode},
 };
-use common::AppConfig;
+use chrono::{TimeZone, Utc};
+use platform_core::AppConfig;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+use std::path::Path;
 use tower::ServiceExt;
 use uuid::Uuid;
 
+fn load_test_config() -> AppConfig {
+    dotenvy::dotenv().ok();
+    let dir = if Path::new("config/default.toml").exists() {
+        "config"
+    } else {
+        "../../config"
+    };
+    AppConfig::load_from_dir(dir, Some("test")).expect("Failed to load test config")
+}
+
 #[tokio::test]
 async fn test_attack_suite_pool_size_1_connection_reuse() -> anyhow::Result<()> {
-    let config = AppConfig::from_env()?;
-    let admin_pool = PgPool::connect(&config.analytics_database_url).await?;
+    let config = load_test_config();
+    let admin_dsn = config.analytics.resolve_dsn()?;
+    let ro_dsn = config.analytics.resolve_ro_dsn()?;
+
+    let admin_pool = PgPool::connect(&admin_dsn).await?;
 
     // Create pool with MAX_CONNECTIONS = 1 (worst-case connection sharing)
     let ro_pool = PgPoolOptions::new()
         .max_connections(1)
-        .connect(&config.analytics_ro_database_url)
+        .connect(&ro_dsn)
         .await?;
 
     let tenant_a = Uuid::new_v4();
     let tenant_b = Uuid::new_v4();
 
-    sqlx::query("INSERT INTO tenants (id, name, health) VALUES ($1, 'Tenant A', 'healthy'), ($2, 'Tenant B', 'healthy')")
-        .bind(tenant_a)
-        .bind(tenant_b)
+    sqlx::query("INSERT INTO sources (id, kind, capture_mode) VALUES ('pg_source_1', 'postgres', 'outbox') ON CONFLICT DO NOTHING;")
         .execute(&admin_pool)
         .await?;
+
+    sqlx::query(
+        "INSERT INTO tenants (tenant_uuid, source_id, external_id, name, health) VALUES ($1, 'pg_source_1', $3, 'Tenant A', 'healthy'), ($2, 'pg_source_1', $4, 'Tenant B', 'healthy')",
+    )
+    .bind(tenant_a)
+    .bind(tenant_b)
+    .bind(format!("ext_{}", tenant_a))
+    .bind(format!("ext_{}", tenant_b))
+    .execute(&admin_pool)
+    .await?;
 
     let token_a = format!("token-{}", tenant_a);
     let token_b = format!("token-{}", tenant_b);
     let hash_a = hash_api_key(&token_a);
     let hash_b = hash_api_key(&token_b);
 
-    sqlx::query("INSERT INTO api_keys (key_hash, tenant_id, name) VALUES ($1, $2, 'Key A'), ($3, $4, 'Key B')")
+    sqlx::query("INSERT INTO api_keys (key_hash, tenant_uuid, name) VALUES ($1, $2, 'Key A'), ($3, $4, 'Key B')")
         .bind(&hash_a)
         .bind(tenant_a)
         .bind(&hash_b)
@@ -42,21 +65,23 @@ async fn test_attack_suite_pool_size_1_connection_reuse() -> anyhow::Result<()> 
         .execute(&admin_pool)
         .await?;
 
-    // Seed distinct data for Tenant A and Tenant B
-    use chrono::{TimeZone, Utc};
-    let hour = Utc.timestamp_opt(((Utc::now().timestamp() - 1800) / 3600) * 3600 + 1800, 0).unwrap();
+    let hour = Utc.timestamp_opt((Utc::now().timestamp() / 3600) * 3600, 0).unwrap();
 
-    sqlx::query("INSERT INTO agg_hourly (tenant_id, hour, status, order_count, sales_paise) VALUES ($1, $2, 'completed', 111, 111000)")
-        .bind(tenant_a)
-        .bind(hour)
-        .execute(&admin_pool)
-        .await?;
+    sqlx::query(
+        "INSERT INTO agg_hourly_status (tenant_uuid, source_id, hour, status, order_count, total_amount_minor) VALUES ($1, 'pg_source_1', $2, 'completed', 111, 111000) ON CONFLICT DO NOTHING;",
+    )
+    .bind(tenant_a)
+    .bind(hour)
+    .execute(&admin_pool)
+    .await?;
 
-    sqlx::query("INSERT INTO agg_hourly (tenant_id, hour, status, order_count, sales_paise) VALUES ($1, $2, 'completed', 222, 222000)")
-        .bind(tenant_b)
-        .bind(hour)
-        .execute(&admin_pool)
-        .await?;
+    sqlx::query(
+        "INSERT INTO agg_hourly_status (tenant_uuid, source_id, hour, status, order_count, total_amount_minor) VALUES ($1, 'pg_source_1', $2, 'completed', 222, 222000) ON CONFLICT DO NOTHING;",
+    )
+    .bind(tenant_b)
+    .bind(hour)
+    .execute(&admin_pool)
+    .await?;
 
     let app = create_app(ro_pool);
 
@@ -73,15 +98,14 @@ async fn test_attack_suite_pool_size_1_connection_reuse() -> anyhow::Result<()> 
                         .body(Body::empty())?,
                 )
                 .await?;
+
             assert_eq!(res.status(), StatusCode::OK);
-            let body = to_bytes(res.into_body(), usize::MAX).await?;
-            let json: serde_json::Value = serde_json::from_slice(&body)?;
+            let bytes = to_bytes(res.into_body(), usize::MAX).await?;
+            let body: serde_json::Value = serde_json::from_slice(&bytes)?;
             assert_eq!(
-                json["order_count"].as_i64().unwrap(),
-                111,
-                "Tenant A on iteration {} got polluted data: {:?}",
-                i,
-                json
+                body["order_count"], 111,
+                "Request {} leaked data! Expected 111 for Tenant A, got {}",
+                i, body["order_count"]
             );
         } else {
             // Tenant B request
@@ -94,15 +118,14 @@ async fn test_attack_suite_pool_size_1_connection_reuse() -> anyhow::Result<()> 
                         .body(Body::empty())?,
                 )
                 .await?;
+
             assert_eq!(res.status(), StatusCode::OK);
-            let body = to_bytes(res.into_body(), usize::MAX).await?;
-            let json: serde_json::Value = serde_json::from_slice(&body)?;
+            let bytes = to_bytes(res.into_body(), usize::MAX).await?;
+            let body: serde_json::Value = serde_json::from_slice(&bytes)?;
             assert_eq!(
-                json["order_count"].as_i64().unwrap(),
-                222,
-                "Tenant B on iteration {} got polluted data: {:?}",
-                i,
-                json
+                body["order_count"], 222,
+                "Request {} leaked data! Expected 222 for Tenant B, got {}",
+                i, body["order_count"]
             );
         }
     }
@@ -111,89 +134,195 @@ async fn test_attack_suite_pool_size_1_connection_reuse() -> anyhow::Result<()> 
 }
 
 #[tokio::test]
-async fn test_attack_suite_unset_tenant_context() -> anyhow::Result<()> {
-    let config = AppConfig::from_env()?;
-    let ro_pool = PgPool::connect(&config.analytics_ro_database_url).await?;
+async fn test_attack_suite_cross_tenant_probe_returns_404() -> anyhow::Result<()> {
+    let config = load_test_config();
+    let admin_dsn = config.analytics.resolve_dsn()?;
+    let ro_dsn = config.analytics.resolve_ro_dsn()?;
 
-    // As api_ro with NO tenant setting set, queries must return 0 rows
-    let count: (i64,) = sqlx::query_as("SELECT count(*) FROM agg_hourly")
-        .fetch_one(&ro_pool)
+    let admin_pool = PgPool::connect(&admin_dsn).await?;
+    let ro_pool = PgPool::connect(&ro_dsn).await?;
+
+    let victim_tenant = Uuid::new_v4();
+    let attacker_tenant = Uuid::new_v4();
+
+    sqlx::query("INSERT INTO sources (id, kind, capture_mode) VALUES ('pg_source_1', 'postgres', 'outbox') ON CONFLICT DO NOTHING;")
+        .execute(&admin_pool)
         .await?;
+
+    sqlx::query(
+        "INSERT INTO tenants (tenant_uuid, source_id, external_id, name, health) VALUES ($1, 'pg_source_1', $3, 'Victim', 'healthy'), ($2, 'pg_source_1', $4, 'Attacker', 'healthy')",
+    )
+    .bind(victim_tenant)
+    .bind(attacker_tenant)
+    .bind(format!("ext_{}", victim_tenant))
+    .bind(format!("ext_{}", attacker_tenant))
+    .execute(&admin_pool)
+    .await?;
+
+    let attacker_token = format!("attacker-token-{}", attacker_tenant);
+    let hash = hash_api_key(&attacker_token);
+
+    sqlx::query("INSERT INTO api_keys (key_hash, tenant_uuid, name) VALUES ($1, $2, 'Attacker Key')")
+        .bind(&hash)
+        .bind(attacker_tenant)
+        .execute(&admin_pool)
+        .await?;
+
+    let app = create_app(ro_pool);
+
+    // Attacker passes THEIR valid Bearer token, but attempts to query the VICTIM's URL path:
+    // /tenants/<victim_id>/orders/count
+    let res = app
+        .oneshot(
+            Request::builder()
+                .uri(format!("/tenants/{}/orders/count", victim_tenant))
+                .header(header::AUTHORIZATION, format!("Bearer {}", attacker_token))
+                .body(Body::empty())?,
+        )
+        .await?;
+
+    // MUST return 404 NOT FOUND (never 403, preventing ID enumeration)
     assert_eq!(
-        count.0, 0,
-        "Unset tenant context must return 0 rows due to RLS NULLIF fallback"
+        res.status(),
+        StatusCode::NOT_FOUND,
+        "Cross-tenant access attempt must be rejected with 404 NOT FOUND to eliminate enumeration"
     );
 
-    let prod_count: (i64,) = sqlx::query_as("SELECT count(*) FROM agg_hourly_product")
-        .fetch_one(&ro_pool)
-        .await?;
-    assert_eq!(
-        prod_count.0, 0,
-        "Unset tenant context must return 0 rows for product rollups"
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_attack_suite_direct_db_bypass_attempt() -> anyhow::Result<()> {
+    let config = load_test_config();
+    let ro_dsn = config.analytics.resolve_ro_dsn()?;
+    let ro_pool = PgPool::connect(&ro_dsn).await?;
+
+    // 1. Attempt to bypass RLS via SET LOCAL row_security = off
+    let mut tx = ro_pool.begin().await?;
+    let _ = sqlx::query("SET LOCAL row_security = off;").execute(&mut *tx).await;
+    let res = sqlx::query("SELECT count(*) FROM agg_hourly_status;").fetch_one(&mut *tx).await;
+
+    assert!(res.is_err(), "Non-superuser api_ro must NOT be allowed to disable row_security");
+    let err_str = res.unwrap_err().to_string();
+    assert!(
+        err_str.contains("42501") || err_str.contains("permission denied") || err_str.contains("row-level security"),
+        "Expected error 42501 permission denied, got: {}",
+        err_str
     );
+    let _ = tx.rollback().await;
+
+    // 2. Querying without app.tenant_id must fail closed (return 0 rows)
+    let mut tx = ro_pool.begin().await?;
+    let count: (i64,) = sqlx::query_as("SELECT count(*)::bigint FROM agg_hourly_status")
+        .fetch_one(&mut *tx)
+        .await?;
+    assert_eq!(count.0, 0, "Query without tenant context must return 0 rows (fail closed)");
+    tx.commit().await?;
 
     Ok(())
 }
 
 #[tokio::test]
 async fn test_attack_suite_sql_injection_defense() -> anyhow::Result<()> {
-    let config = AppConfig::from_env()?;
-    let ro_pool = PgPool::connect(&config.analytics_ro_database_url).await?;
+    let config = load_test_config();
+    let admin_dsn = config.analytics.resolve_dsn()?;
+    let ro_dsn = config.analytics.resolve_ro_dsn()?;
+
+    let admin_pool = PgPool::connect(&admin_dsn).await?;
+    let ro_pool = PgPool::connect(&ro_dsn).await?;
+
+    let tenant = Uuid::new_v4();
+    let token = format!("token-sqli-{}", tenant);
+    let key_hash = hash_api_key(&token);
+
+    sqlx::query("INSERT INTO sources (id, kind, capture_mode) VALUES ('pg_source_1', 'postgres', 'outbox') ON CONFLICT DO NOTHING;")
+        .execute(&admin_pool)
+        .await?;
+
+    sqlx::query("INSERT INTO tenants (tenant_uuid, source_id, external_id, name, health) VALUES ($1, 'pg_source_1', $2, 'SQLi Test', 'healthy')")
+        .bind(tenant)
+        .bind(format!("ext_{}", tenant))
+        .execute(&admin_pool)
+        .await?;
+
+    sqlx::query("INSERT INTO api_keys (key_hash, tenant_uuid, name) VALUES ($1, $2, 'SQLi Key')")
+        .bind(&key_hash)
+        .bind(tenant)
+        .execute(&admin_pool)
+        .await?;
+
     let app = create_app(ro_pool);
 
-    // Attempt SQL injection in path
+    // 1. Attack payload in status query param
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/tenants/'%20OR%20'1'='1/orders/count")
-                .header(header::AUTHORIZATION, "Bearer whatever")
+                .uri(format!("/tenants/{}/orders/count?status=%27%20OR%20%271%27=%271", tenant))
+                .header(header::AUTHORIZATION, format!("Bearer {}", token))
                 .body(Body::empty())?,
         )
         .await?;
-    // Path parser rejects non-UUID strings or unauthenticated requests
-    assert!(
-        res.status() == StatusCode::NOT_FOUND
-            || res.status() == StatusCode::BAD_REQUEST
-            || res.status() == StatusCode::UNAUTHORIZED
-    );
+    assert_eq!(res.status(), StatusCode::OK);
+    let bytes = to_bytes(res.into_body(), usize::MAX).await?;
+    let body: serde_json::Value = serde_json::from_slice(&bytes)?;
+    assert_eq!(body["order_count"], 0, "SQL injection in status must not match anything");
 
-    // Attempt SQL injection in Authorization header
+    // 2. Attack payload in timestamp query param (must return 400 Bad Request)
     let res = app
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/tenants/00000000-0000-0001-0000-000000000001/orders/count")
-                .header(
-                    header::AUTHORIZATION,
-                    "Bearer ' OR 1=1; DROP TABLE agg_hourly; --",
-                )
+                .uri(format!("/tenants/{}/orders/count?from=2026-01-01%27%20OR%201=1;--", tenant))
+                .header(header::AUTHORIZATION, format!("Bearer {}", token))
                 .body(Body::empty())?,
         )
         .await?;
-    assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+    assert_eq!(res.status(), StatusCode::BAD_REQUEST, "Malformed timestamp must fail validation");
+
+    // 3. Attack payload in Bearer auth header (must return 401 Unauthorized)
+    let res = app
+        .oneshot(
+            Request::builder()
+                .uri(format!("/tenants/{}/orders/count", tenant))
+                .header(header::AUTHORIZATION, "Bearer ' OR 1=1;--")
+                .body(Body::empty())?,
+        )
+        .await?;
+    assert_eq!(res.status(), StatusCode::UNAUTHORIZED, "Forged auth header must return 401");
 
     Ok(())
 }
 
 #[tokio::test]
-async fn test_attack_suite_superuser_refusal() -> anyhow::Result<()> {
-    let config = AppConfig::from_env()?;
-    // Admin pool is connected as superuser (postgres)
-    let admin_pool = PgPool::connect(&config.analytics_database_url).await?;
+async fn test_attack_suite_unauthenticated_requests() -> anyhow::Result<()> {
+    let config = load_test_config();
+    let ro_dsn = config.analytics.resolve_ro_dsn()?;
+    let ro_pool = PgPool::connect(&ro_dsn).await?;
+    let app = create_app(ro_pool);
+    let tenant = Uuid::new_v4();
 
-    // Startup self check MUST FAIL when passed superuser pool!
-    let result = SecuritySelfCheck::run(&admin_pool).await;
-    assert!(
-        result.is_err(),
-        "SecuritySelfCheck must refuse to boot when connected as superuser"
-    );
-    let err_str = result.unwrap_err().to_string();
-    assert!(
-        err_str.contains("SUPERUSER") || err_str.contains("BYPASSRLS"),
-        "Error message should mention superuser/bypassrls: {}",
-        err_str
-    );
+    // 1. Missing Authorization header
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri(format!("/tenants/{}/orders/count", tenant))
+                .body(Body::empty())?,
+        )
+        .await?;
+    assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
+
+    // 2. Invalid Bearer token
+    let res = app
+        .oneshot(
+            Request::builder()
+                .uri(format!("/tenants/{}/orders/count", tenant))
+                .header(header::AUTHORIZATION, "Bearer totally-fake-token-999")
+                .body(Body::empty())?,
+        )
+        .await?;
+    assert_eq!(res.status(), StatusCode::UNAUTHORIZED);
 
     Ok(())
 }

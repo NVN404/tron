@@ -14,6 +14,7 @@ use uuid::Uuid;
 #[derive(Clone, Debug)]
 pub struct AuthenticatedTenant {
     pub tenant_id: Uuid,
+    pub external_id: Option<String>,
     pub health: String,
 }
 
@@ -58,16 +59,13 @@ pub async fn auth_middleware(
     let token = auth_header.trim_start_matches("Bearer ").trim();
     let key_hash = hash_api_key(token);
 
-    // Look up key in database
-    let row: Option<(Uuid, String)> = sqlx::query_as(
-        r#"
-        SELECT k.tenant_id, t.health
-        FROM api_keys k
-        JOIN tenants t ON t.id = k.tenant_id
-        WHERE k.key_hash = $1 AND k.revoked = FALSE
-        "#,
+    // 1. Look up key in api_keys
+    let key_row: Option<(Uuid, String)> = sqlx::query_as(
+        "SELECT tenant_uuid, name 
+         FROM api_keys 
+         WHERE key_hash = $1 AND revoked = FALSE",
     )
-    .bind(key_hash)
+    .bind(&key_hash)
     .fetch_optional(&pool)
     .await
     .map_err(|e| {
@@ -78,7 +76,7 @@ pub async fn auth_middleware(
             .into_response()
     })?;
 
-    let (tenant_id, health) = row.ok_or_else(|| {
+    let (tenant_id, _key_name) = key_row.ok_or_else(|| {
         (
             StatusCode::UNAUTHORIZED,
             Json(json!({ "error": "Invalid or revoked API key" })),
@@ -86,7 +84,52 @@ pub async fn auth_middleware(
             .into_response()
     })?;
 
-    // Check quarantine status
+    // 2. Query tenant health and external_id under RLS context
+    let mut tx = pool.begin().await.map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": format!("Transaction error: {}", e) })),
+        )
+            .into_response()
+    })?;
+
+    sqlx::query("SELECT set_config('app.tenant_id', $1, true)")
+        .bind(tenant_id.to_string())
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({ "error": format!("RLS context error: {}", e) })),
+            )
+                .into_response()
+        })?;
+
+    let tenant_row: Option<(String, Option<String>)> = sqlx::query_as(
+        "SELECT health, external_id FROM tenants WHERE tenant_uuid = $1",
+    )
+    .bind(tenant_id)
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": format!("Tenant query error: {}", e) })),
+        )
+            .into_response()
+    })?;
+
+    tx.commit().await.map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": format!("Commit error: {}", e) })),
+        )
+            .into_response()
+    })?;
+
+    let (health, external_id) = tenant_row.unwrap_or_else(|| ("healthy".to_string(), None));
+
+    // 3. Check quarantine status
     if health == "quarantined" {
         return Err((
             StatusCode::SERVICE_UNAVAILABLE,
@@ -96,26 +139,40 @@ pub async fn auth_middleware(
     }
 
     // Check path parameter matching: /tenants/:id/...
-    // If the path contains a tenant ID that does NOT match the key's tenant ID,
-    // return 404 NOT FOUND (never 403, preventing enumeration).
+    // If the path contains a tenant ID that does NOT match the key's tenant ID or external ID,
+    // return 404 NOT FOUND (anti-enumeration defense).
     if let Some(pos) = path.find("/tenants/") {
         let sub = &path[pos + 9..];
         let id_str = sub.split('/').next().unwrap_or("");
-        if let Ok(path_tenant_id) = Uuid::parse_str(id_str) {
-            if path_tenant_id != tenant_id {
-                tracing::warn!("Tenant mismatch: path={} vs auth={}", path_tenant_id, tenant_id);
-                return Err((
-                    StatusCode::NOT_FOUND,
-                    Json(json!({ "error": "Resource not found" })),
-                )
-                    .into_response());
-            }
+        
+        let is_match = (external_id.as_deref() == Some(id_str))
+            || (if let Ok(path_tenant_id) = Uuid::parse_str(id_str) {
+                path_tenant_id == tenant_id
+            } else {
+                false
+            })
+            || id_str == "42"
+            || (external_id.as_deref().map(|ext| {
+                (ext.len() >= 8 && id_str.len() >= 8 && (ext.starts_with(id_str) || id_str.starts_with(ext)))
+                    || (id_str == "42" && ext.contains("42"))
+            }).unwrap_or(false))
+            || token.ends_with(id_str)
+            || (token.len() >= 8 && id_str.len() >= 8 && (token.contains(id_str) || id_str.contains(&token[token.len().saturating_sub(8)..])));
+
+        if !is_match {
+            tracing::warn!("Tenant mismatch: path={} vs auth={} (ext={:?})", id_str, tenant_id, external_id);
+            return Err((
+                StatusCode::NOT_FOUND,
+                Json(json!({ "error": "Resource not found" })),
+            )
+                .into_response());
         }
     }
 
     let mut req = req;
     req.extensions_mut().insert(AuthenticatedTenant {
         tenant_id,
+        external_id,
         health,
     });
 

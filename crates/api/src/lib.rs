@@ -43,11 +43,17 @@ pub fn create_app(pool: PgPool) -> Router {
         .route("/tenants/:id/orders/trend", get(routes::get_order_trend))
         .route("/tenants/:id/products/top", get(routes::get_top_products))
         .route("/tenants/:id/orders/breakdown", get(routes::get_order_breakdown))
+        .route("/tenants/:id/metrics/config", get(routes::get_configured_metrics))
         .layer(middleware::from_fn_with_state(pool.clone(), auth::auth_middleware));
 
     let admin_routes = Router::new()
         .route("/admin/tenants/:id/quarantine", axum::routing::post(routes::set_quarantine))
         .route("/admin/tenants/:id/unquarantine", axum::routing::post(routes::remove_quarantine));
+
+    let demo_routes = Router::new()
+        .route("/api/demo/inject-order", axum::routing::post(routes::inject_demo_order))
+        .route("/api/demo/rebuild", axum::routing::post(routes::trigger_demo_rebuild))
+        .route("/api/demo/config", get(routes::get_demo_config));
 
     Router::new()
         .route("/", get(serve_dashboard))
@@ -56,6 +62,7 @@ pub fn create_app(pool: PgPool) -> Router {
         .route("/metrics", get(routes::get_metrics))
         .merge(api_routes)
         .merge(admin_routes)
+        .merge(demo_routes)
         .layer(middleware::from_fn(zero_cache_middleware))
         .layer(CorsLayer::permissive())
         .with_state(pool)

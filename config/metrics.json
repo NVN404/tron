@@ -1,0 +1,25 @@
+{
+  "metrics": [
+    {
+      "id": "average_order_value",
+      "name": "Average Order Value (AOV)",
+      "description": "Gross revenue divided by completed order count",
+      "unit": "paise",
+      "formula": "COALESCE(SUM(total_amount_minor) / NULLIF(SUM(order_count), 0), 0)::BIGINT"
+    },
+    {
+      "id": "cancellation_rate_pct",
+      "name": "Order Cancellation Rate",
+      "description": "Cancelled orders percentage of total orders",
+      "unit": "percent",
+      "formula": "ROUND(COALESCE(SUM(CASE WHEN status = 'cancelled' THEN order_count ELSE 0 END)::NUMERIC / NULLIF(SUM(order_count), 0) * 100, 0), 2)::FLOAT"
+    },
+    {
+      "id": "hourly_run_rate",
+      "name": "Hourly Run Rate",
+      "description": "Average revenue generated per active hour",
+      "unit": "paise/hour",
+      "formula": "COALESCE(SUM(total_amount_minor) / NULLIF(COUNT(DISTINCT hour), 0), 0)::BIGINT"
+    }
+  ]
+}

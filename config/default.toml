@@ -1,0 +1,122 @@
+[analytics]
+dsn_env = "ANALYTICS_DATABASE_URL"
+ro_dsn_env = "ANALYTICS_RO_DATABASE_URL"
+max_connections = 20
+
+# -------------------------------------------------------------
+# SOURCE DATABASES
+# -------------------------------------------------------------
+
+[[sources]]
+id = "pg_source_1"
+kind = "postgres"
+dsn_env = "SOURCE_PG_1_DATABASE_URL"
+capture = "outbox"
+timezone = "Asia/Kolkata"
+[sources.mapping]
+entity = "orders"
+tenant_id_field = "tenant_id"
+id_field = "id"
+status_field = "status"
+amount_field = "amount_paise"
+product_id_field = "product_id"
+category_field = "category"
+created_at_field = "created_at"
+amount_scale = 100
+sales_counting_statuses = ["completed"]
+
+[[sources]]
+id = "pg_source_2"
+kind = "postgres"
+dsn_env = "SOURCE_PG_2_DATABASE_URL"
+capture = "outbox"
+timezone = "Asia/Kolkata"
+[sources.mapping]
+entity = "orders"
+tenant_id_field = "tenant_id"
+id_field = "id"
+status_field = "status"
+amount_field = "amount_paise"
+product_id_field = "product_id"
+category_field = "category"
+created_at_field = "created_at"
+amount_scale = 100
+sales_counting_statuses = ["completed"]
+
+[[sources]]
+id = "mysql_source"
+kind = "mysql"
+dsn_env = "SOURCE_MYSQL_DATABASE_URL"
+capture = "outbox"
+timezone = "Asia/Kolkata"
+[sources.mapping]
+entity = "sales"
+tenant_id_field = "tenant_id"
+id_field = "sale_id"
+status_field = "status"
+amount_field = "amount_cents"
+product_id_field = "product_id"
+category_field = "category"
+created_at_field = "created_at"
+amount_scale = 100
+sales_counting_statuses = ["completed"]
+
+[[sources]]
+id = "mongo_source"
+kind = "mongo"
+dsn_env = "SOURCE_MONGO_DATABASE_URL"
+capture = "changestream"
+timezone = "Asia/Kolkata"
+[sources.mapping]
+entity = "orders"
+tenant_id_field = "tenant_id"
+id_field = "order_id"
+status_field = "status"
+amount_field = "amount_cents"
+product_id_field = "product_id"
+category_field = "category"
+created_at_field = "created_at"
+amount_scale = 100
+sales_counting_statuses = ["completed"]
+
+# -------------------------------------------------------------
+# WORKER PIPELINE
+# -------------------------------------------------------------
+
+[worker]
+batch_size = 1000
+lease_secs = 30
+heartbeat_secs = 10
+max_attempts = 5
+backoff_base_ms = 500
+concurrency = 8
+[worker.per_source_limits]
+pg_source_1 = 4
+pg_source_2 = 4
+mysql_source = 4
+mongo_source = 4
+
+# -------------------------------------------------------------
+# REST API
+# -------------------------------------------------------------
+
+[api]
+bind = "0.0.0.0:8080"
+pool_size = 20
+rate_limit_per_min = 1000
+max_range_days = 90
+
+# -------------------------------------------------------------
+# SEED & BENCHMARK
+# -------------------------------------------------------------
+
+[seed]
+rng_seed = 42
+tenants_per_source = 25
+total_rows = 10000000
+skew = 1.0
+
+[benchmark]
+concurrency = 20
+requests = 500
+

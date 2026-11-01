@@ -1,8 +1,8 @@
-# Multi-Tenant Aggregation Layer (Mitigata)
+# TRON: Multi-Tenant Aggregation Layer
 
-A production-grade, secure, and measurable **Multi-Tenant Aggregation Layer** built in Rust for the Cybersecurity Hackathon.
+A production-grade, secure, and measurable **Heterogeneous Multi-Tenant Aggregation Platform** built in Rust.
 
-Mitigata solves the dual challenges of **analytical query performance** (sub-5ms p99 dashboard latency over 10M records) and **strict tenant data isolation** (mathematically and empirically immune to cross-tenant data leaks, resolving cybersecurity vulnerability **INC-02**).
+TRON solves the dual challenges of **analytical query performance** (sub-5ms p99 dashboard latency over 10M records across heterogeneous PostgreSQL, MySQL, and MongoDB databases) and **strict tenant data isolation** (mathematically and empirically immune to cross-tenant data leaks, resolving cybersecurity vulnerability **INC-02**).
 
 ---
 

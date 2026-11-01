@@ -1,0 +1,8 @@
+[package]
+name = "testkit"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+platform-core = { workspace = true }
+anyhow = { workspace = true }

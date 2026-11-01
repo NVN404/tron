@@ -1,12 +1,20 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/common",
+    "crates/core",
+    "crates/adapter-postgres",
+    "crates/adapter-mysql",
+    "crates/adapter-mongo",
+    "crates/capture",
     "crates/worker",
+    "crates/analytics-store",
     "crates/api",
-    "crates/seed",
     "crates/oracle",
+    "crates/seed",
+    "crates/testkit",
+    "crates/cli",
     "crates/bench",
+    "crates/common",
 ]
 
 [workspace.package]
@@ -21,19 +29,24 @@ tokio = { version = "1.40", features = ["full"] }
 axum = { version = "0.7", features = ["macros"] }
 tower = { version = "0.5", features = ["util"] }
 tower-http = { version = "0.6", features = ["trace", "cors", "timeout"] }
+async-trait = "0.1"
+futures = "0.3"
 
 # Database
-sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "macros"] }
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "mysql", "uuid", "chrono", "macros"] }
+mongodb = "3.1"
 
-# Serialization
+# Serialization & Config
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+toml = "0.8"
 sha2 = "0.10"
 hex = "0.4"
+regex = "1.10"
 
 # Time & Identity
 chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.10", features = ["v4", "serde"] }
+uuid = { version = "1.10", features = ["v4", "v5", "serde"] }
 
 # Logging & Telemetry
 tracing = "0.1"
@@ -46,7 +59,11 @@ anyhow = "1.0"
 # CLI & Environment
 clap = { version = "4.5", features = ["derive", "env"] }
 dotenvy = "0.15"
+tempfile = "3.10"
 
 # Internal Workspace Crates
+platform-core = { path = "crates/core" }
 common = { path = "crates/common" }
 oracle = { path = "crates/oracle" }
+analytics-store = { path = "crates/analytics-store" }
+testkit = { path = "crates/testkit" }

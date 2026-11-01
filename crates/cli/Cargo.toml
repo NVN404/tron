@@ -1,0 +1,29 @@
+[package]
+name = "cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "mitigata-cli"
+path = "src/main.rs"
+
+[dependencies]
+platform-core = { workspace = true }
+analytics-store = { workspace = true }
+adapter-postgres = { path = "../adapter-postgres" }
+adapter-mysql = { path = "../adapter-mysql" }
+adapter-mongo = { path = "../adapter-mongo" }
+capture = { path = "../capture" }
+worker = { path = "../worker" }
+api = { path = "../api" }
+oracle = { workspace = true }
+axum = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+tokio = { workspace = true }
+sqlx = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+dotenvy = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }

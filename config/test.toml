@@ -1,0 +1,17 @@
+[worker]
+batch_size = 50
+lease_secs = 5
+heartbeat_secs = 2
+max_attempts = 3
+backoff_base_ms = 50
+
+[seed]
+rng_seed = 1337
+tenants_per_source = 2
+total_rows = 100
+skew = 1.0
+
+[api]
+pool_size = 5
+max_range_days = 365
+

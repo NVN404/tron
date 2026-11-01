@@ -1,16 +1,15 @@
-use anyhow::Result;
-use chrono::{DateTime, Duration, Utc};
+use analytics_store::AnalyticsStore;
+use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
-use common::{init_telemetry, AppConfig};
-use sqlx::PgPool;
-use std::sync::atomic::{AtomicBool, Ordering};
+use platform_core::AppConfig;
+use sqlx::postgres::PgPoolOptions;
+use std::path::Path;
 use std::sync::Arc;
-use tracing::info;
-use uuid::Uuid;
-use worker::{BackfillRunner, WorkerEngine};
+use tokio::sync::broadcast;
+use worker::WorkerEngine;
 
 #[derive(Parser, Debug)]
-#[command(name = "worker", about = "Multi-tenant aggregation background worker")]
+#[command(name = "worker", about = "Analytics Aggregation Worker")]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -18,107 +17,53 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Run worker continuous processing loop
+    /// Run the aggregation worker daemon (default)
     Run,
-    /// Backfill historical data from source database
-    Backfill {
-        #[arg(long)]
-        tenant: Option<Uuid>,
-        #[arg(long)]
-        from: Option<String>,
-        #[arg(long)]
-        to: Option<String>,
-    },
-    /// Truncate rollups and run full rebuild
-    Rebuild {
-        #[arg(long)]
-        tenant: Option<Uuid>,
-        #[arg(long)]
-        from: Option<String>,
-        #[arg(long)]
-        to: Option<String>,
-    },
-    /// Reconcile and self-heal drift against source
-    Reconcile {
-        #[arg(long)]
-        tenant: Uuid,
-        #[arg(long)]
-        from: Option<String>,
-        #[arg(long)]
-        to: Option<String>,
-    },
+    /// Scan source databases and backfill all historic buckets
+    Backfill,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    init_telemetry("worker");
-    let cli = Cli::parse();
-    let config = AppConfig::from_env()?;
+    dotenvy::dotenv().ok();
+    tracing_subscriber::fmt::init();
 
-    let source_pool = PgPool::connect(&config.source_database_url).await?;
-    let analytics_pool = PgPool::connect(&config.analytics_database_url).await?;
+    let cli = Cli::parse();
+
+    let config_dir = if Path::new("config/default.toml").exists() {
+        "config"
+    } else {
+        "../../config"
+    };
+    let app_config = AppConfig::load_from_dir(config_dir, None)
+        .with_context(|| "Failed to load layered configuration")?;
+
+    let analytics_dsn = app_config.analytics.resolve_dsn()?;
+    let pool = PgPoolOptions::new()
+        .max_connections(app_config.analytics.max_connections)
+        .connect(&analytics_dsn)
+        .await
+        .with_context(|| "Failed to connect to Analytics PostgreSQL")?;
+
+    let store = AnalyticsStore::new(pool);
+    store.register_sources(&app_config).await?;
+
+    let engine = WorkerEngine::from_config(&app_config, store).await?;
 
     match cli.command.unwrap_or(Commands::Run) {
         Commands::Run => {
-            let engine = WorkerEngine::new(
-                source_pool,
-                analytics_pool,
-                "worker-01".to_string(),
-                config.worker_batch_size,
-                config.worker_lease_seconds,
-            );
-
-            info!("Starting Aggregation Worker continuous service...");
-            let running = Arc::new(AtomicBool::new(true));
-            let r = running.clone();
-
+            let (shutdown_tx, shutdown_rx) = broadcast::channel(1);
             tokio::spawn(async move {
-                tokio::signal::ctrl_c().await.expect("Failed to listen for ctrl+c");
-                info!("Shutdown signal received, draining worker loop...");
-                r.store(false, Ordering::Relaxed);
+                tokio::signal::ctrl_c().await.ok();
+                let _ = shutdown_tx.send(());
             });
 
-            engine.run_loop(running, config.worker_poll_interval_ms).await?;
+            WorkerEngine::start_daemon(Arc::new(engine), shutdown_rx).await;
         }
-        Commands::Backfill { tenant, from, to } => {
-            let backfiller = BackfillRunner::new(source_pool, analytics_pool);
-            let from_dt = from
-                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
-                .unwrap_or_else(|| Utc::now() - Duration::days(400));
-            let to_dt = to
-                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
-                .unwrap_or_else(|| Utc::now() + Duration::days(1));
-
-            info!("Starting Backfill across range [{}, {})...", from_dt, to_dt);
-            let plans = backfiller.plan_tenants(tenant).await?;
-            for p in plans {
-                backfiller.backfill_tenant(p.tenant_id, from_dt, to_dt, 30).await?;
-            }
-            info!("Backfill completed successfully.");
-        }
-        Commands::Rebuild { tenant, from, to } => {
-            let backfiller = BackfillRunner::new(source_pool, analytics_pool);
-            let from_dt = from
-                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
-                .unwrap_or_else(|| Utc::now() - Duration::days(400));
-            let to_dt = to
-                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
-                .unwrap_or_else(|| Utc::now() + Duration::days(1));
-
-            backfiller.rebuild(tenant, from_dt, to_dt).await?;
-        }
-        Commands::Reconcile { tenant, from, to } => {
-            let reconciler = worker::Reconciler::new(source_pool, analytics_pool);
-            let from_dt = from
-                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
-                .unwrap_or_else(|| Utc::now() - Duration::days(7));
-            let to_dt = to
-                .and_then(|s| DateTime::parse_from_rfc3339(&s).ok().map(|d| d.to_utc()))
-                .unwrap_or_else(Utc::now);
-
-            info!("Starting reconciliation for tenant {} in [{}, {})...", tenant, from_dt, to_dt);
-            let drifts = reconciler.reconcile_window(tenant, from_dt, to_dt).await?;
-            info!("Reconciliation finished. Detected and repaired {} drifted buckets.", drifts.len());
+        Commands::Backfill => {
+            tracing::info!("Starting backfill scan across all configured sources...");
+            let count = engine.backfill().await?;
+            tracing::info!("Backfill completed successfully. Processed {} buckets.", count);
         }
     }
 

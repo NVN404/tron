@@ -1,37 +1,4 @@
 services:
-  source_db:
-    image: postgres:16-alpine
-    container_name: mitigata_source_db
-    environment:
-      POSTGRES_DB: source_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5433:5432"
-    volumes:
-      - source_pg_data:/var/lib/postgresql/data
-      - ./infra/init-source.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    command: >
-      postgres
-      -c shared_buffers=256MB
-      -c work_mem=16MB
-      -c maintenance_work_mem=64MB
-      -c max_connections=200
-      -c checkpoint_completion_target=0.9
-      -c wal_buffers=16MB
-      -c timezone=Asia/Kolkata
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d source_db"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-      start_period: 5s
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 2048M
-
   analytics_db:
     image: postgres:16-alpine
     container_name: mitigata_analytics_db
@@ -46,23 +13,102 @@ services:
       - ./infra/init-analytics.sql:/docker-entrypoint-initdb.d/init.sql:ro
     command: >
       postgres
-      -c shared_buffers=512MB
-      -c work_mem=64MB
-      -c maintenance_work_mem=128MB
+      -c shared_buffers=256MB
+      -c work_mem=32MB
+      -c maintenance_work_mem=64MB
       -c max_connections=200
       -c timezone=Asia/Kolkata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d analytics_db"]
       interval: 3s
       timeout: 3s
-      retries: 10
+      retries: 15
       start_period: 5s
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 2048M
+
+  source_pg_1:
+    image: postgres:16-alpine
+    container_name: mitigata_source_pg_1
+    environment:
+      POSTGRES_DB: source_db_1
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - source_pg_1_data:/var/lib/postgresql/data
+      - ./infra/init-source.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c max_connections=100
+      -c timezone=Asia/Kolkata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d source_db_1"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+  source_pg_2:
+    image: postgres:16-alpine
+    container_name: mitigata_source_pg_2
+    environment:
+      POSTGRES_DB: source_db_2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - source_pg_2_data:/var/lib/postgresql/data
+      - ./infra/init-source.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c max_connections=100
+      -c timezone=Asia/Kolkata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d source_db_2"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+  source_mysql:
+    image: mysql:8.0
+    container_name: mitigata_source_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: source_db
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - source_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  source_mongo:
+    image: mongo:7.0
+    container_name: mitigata_source_mongo
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - source_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --port 27017 --eval 'try { rs.status().ok } catch (e) { rs.initiate({_id: \"rs0\", members: [{_id: 0, host: \"localhost:27017\"}]}).ok }' || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
 
 volumes:
-  source_pg_data:
   analytics_pg_data:
+  source_pg_1_data:
+  source_pg_2_data:
+  source_mysql_data:
+  source_mongo_data:

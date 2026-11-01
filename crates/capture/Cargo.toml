@@ -1,0 +1,18 @@
+[package]
+name = "capture"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+platform-core = { workspace = true }
+analytics-store = { workspace = true }
+adapter-postgres = { path = "../adapter-postgres" }
+adapter-mysql = { path = "../adapter-mysql" }
+adapter-mongo = { path = "../adapter-mongo" }
+tokio = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+
+[dev-dependencies]
+dotenvy = { workspace = true }

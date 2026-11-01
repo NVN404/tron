@@ -1,365 +1,306 @@
-use crate::protocol::*;
-use anyhow::Result;
-use sqlx::{PgPool, Row};
+use adapter_mongo::MongoAdapter;
+use adapter_mysql::MysqlAdapter;
+use adapter_postgres::PostgresAdapter;
+use analytics_store::{AnalyticsStore, ClaimedBucket, PublishResult};
+use anyhow::{anyhow, Result};
+use chrono::TimeZone;
+use platform_core::config::{AppConfig, SourceConfig, SourceKind, WorkerConfig};
+use platform_core::traits::BucketReader;
+use platform_core::types::BucketKey;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::{broadcast, Semaphore};
 use tracing::{error, info, warn};
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub struct WorkerEngine {
-    source_pool: PgPool,
-    analytics_pool: PgPool,
-    worker_name: String,
-    batch_size: i64,
-    lease_seconds: i64,
+    store: AnalyticsStore,
+    readers: Arc<HashMap<String, Box<dyn BucketReader>>>,
+    source_configs: Arc<HashMap<String, SourceConfig>>,
+    config: WorkerConfig,
+    worker_id: String,
 }
 
 impl WorkerEngine {
-    pub fn new(
-        source_pool: PgPool,
-        analytics_pool: PgPool,
-        worker_name: String,
-        batch_size: i64,
-        lease_seconds: i64,
-    ) -> Self {
-        Self {
-            source_pool,
-            analytics_pool,
-            worker_name,
-            batch_size,
-            lease_seconds,
-        }
-    }
+    pub async fn from_config(config: &AppConfig, store: AnalyticsStore) -> Result<Self> {
+        let mut readers: HashMap<String, Box<dyn BucketReader>> = HashMap::new();
+        let mut source_configs: HashMap<String, SourceConfig> = HashMap::new();
 
-    /// Claim a batch of outbox rows using FOR UPDATE SKIP LOCKED
-    pub async fn claim_batch(&self) -> Result<Option<ClaimedBatch>> {
-        let claim_token = Uuid::new_v4();
-        let claimed_by = format!("{}-{}", self.worker_name, std::process::id());
-
-        let mut tx = self.source_pool.begin().await?;
-
-        let rows = sqlx::query(
-            r#"
-            WITH claimable AS (
-                SELECT id FROM outbox
-                WHERE (status = 'pending' AND next_retry_at <= NOW())
-                   OR (status = 'claimed' AND locked_until < NOW())
-                ORDER BY id ASC
-                LIMIT $1
-                FOR UPDATE SKIP LOCKED
-            )
-            UPDATE outbox
-            SET status = 'claimed',
-                claimed_by = $2,
-                claim_token = $3,
-                locked_until = NOW() + ($4 || ' seconds')::interval,
-                attempts = attempts + 1
-            WHERE id IN (SELECT id FROM claimable)
-            RETURNING id, tenant_id, bucket_hour, attempts;
-            "#,
-        )
-        .bind(self.batch_size)
-        .bind(&claimed_by)
-        .bind(claim_token)
-        .bind(self.lease_seconds)
-        .fetch_all(&mut *tx)
-        .await?;
-
-        tx.commit().await?;
-
-        if rows.is_empty() {
-            return Ok(None);
-        }
-
-        let claimed_rows = rows
-            .into_iter()
-            .map(|r| ClaimedRow {
-                id: r.get("id"),
-                tenant_id: r.get("tenant_id"),
-                bucket_hour: r.get("bucket_hour"),
-                attempts: r.get("attempts"),
-            })
-            .collect();
-
-        Ok(Some(ClaimedBatch {
-            claim_token,
-            claimed_by,
-            rows: claimed_rows,
-        }))
-    }
-
-    /// Deduplicate claimed hints into distinct (tenant_id, bucket_hour) targets with version = max(outbox_id)
-    pub fn deduplicate_targets(&self, batch: &ClaimedBatch) -> Vec<(BucketTarget, i64)> {
-        let mut map: HashMap<BucketTarget, i64> = HashMap::new();
-        for r in &batch.rows {
-            let target = BucketTarget {
-                tenant_id: r.tenant_id,
-                bucket_hour: r.bucket_hour,
-            };
-            let entry = map.entry(target).or_insert(r.id);
-            if r.id > *entry {
-                *entry = r.id;
+        for src in &config.sources {
+            source_configs.insert(src.id.clone(), src.clone());
+            match src.kind {
+                SourceKind::Postgres => {
+                    let adapter = PostgresAdapter::new(src.clone()).await?;
+                    readers.insert(src.id.clone(), Box::new(adapter));
+                }
+                SourceKind::Mysql => {
+                    let adapter = MysqlAdapter::new(src.clone()).await?;
+                    readers.insert(src.id.clone(), Box::new(adapter));
+                }
+                SourceKind::Mongo => {
+                    let adapter = MongoAdapter::new(src.clone()).await?;
+                    readers.insert(src.id.clone(), Box::new(adapter));
+                }
             }
         }
-        map.into_iter().collect()
-    }
 
-    /// Recompute rollups for a specific bucket slice inside a REPEATABLE READ snapshot on the source DB
-    pub async fn recompute_bucket(&self, target: &BucketTarget, version: i64) -> Result<BucketComputation> {
-        let mut tx = self.source_pool.begin().await?;
+        let worker_id = format!("worker_{}", Uuid::new_v4().simple());
 
-        sqlx::query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
-            .execute(&mut *tx)
-            .await?;
-        sqlx::query("SET statement_timeout = '2s'")
-            .execute(&mut *tx)
-            .await?;
-
-        // 1. Status rollups
-        let status_rows = sqlx::query(
-            r#"
-            SELECT 
-                status, 
-                COUNT(*)::BIGINT AS order_count, 
-                COALESCE(SUM(amount_paise), 0)::BIGINT AS sales_paise
-            FROM orders
-            WHERE tenant_id = $1
-              AND created_at >= $2 
-              AND created_at < ($2 + INTERVAL '1 hour')
-              AND deleted_at IS NULL
-            GROUP BY status
-            "#,
-        )
-        .bind(target.tenant_id)
-        .bind(target.bucket_hour)
-        .fetch_all(&mut *tx)
-        .await?;
-
-        let status_rollups = status_rows
-            .into_iter()
-            .map(|r| StatusRollup {
-                status: r.get("status"),
-                order_count: r.get("order_count"),
-                sales_paise: r.get("sales_paise"),
-            })
-            .collect();
-
-        // 2. Product rollups (strictly completed orders)
-        let prod_rows = sqlx::query(
-            r#"
-            SELECT 
-                product_id, 
-                category, 
-                COUNT(*)::BIGINT AS units, 
-                COALESCE(SUM(amount_paise), 0)::BIGINT AS sales_paise
-            FROM orders
-            WHERE tenant_id = $1
-              AND created_at >= $2 
-              AND created_at < ($2 + INTERVAL '1 hour')
-              AND deleted_at IS NULL
-              AND status = 'completed'
-            GROUP BY product_id, category
-            "#,
-        )
-        .bind(target.tenant_id)
-        .bind(target.bucket_hour)
-        .fetch_all(&mut *tx)
-        .await?;
-
-        let product_rollups = prod_rows
-            .into_iter()
-            .map(|r| ProductRollup {
-                product_id: r.get("product_id"),
-                category: r.get("category"),
-                units: r.get("units"),
-                sales_paise: r.get("sales_paise"),
-            })
-            .collect();
-
-        tx.commit().await?;
-
-        Ok(BucketComputation {
-            target: target.clone(),
-            version,
-            status_rollups,
-            product_rollups,
+        Ok(Self {
+            store,
+            readers: Arc::new(readers),
+            source_configs: Arc::new(source_configs),
+            config: config.worker.clone(),
+            worker_id,
         })
     }
 
-    /// Publish computation to Analytics DB atomically with version fencing and advisory locking
-    pub async fn publish_bucket(&self, comp: &BucketComputation) -> Result<PublishResult> {
-        let mut tx = self.analytics_pool.begin().await?;
-
-        // 1. Transaction-scoped advisory lock on (tenant_id, bucket_hour)
-        let lock_key = format!("{}-{}", comp.target.tenant_id, comp.target.bucket_hour);
-        sqlx::query("SELECT pg_advisory_xact_lock(hashtext($1))")
-            .bind(&lock_key)
-            .execute(&mut *tx)
-            .await?;
-
-        // 2. Version fencing check: incoming_version must be > published_version
-        let current_version: Option<(i64,)> = sqlx::query_as(
-            "SELECT published_version FROM bucket_state WHERE tenant_id = $1 AND hour = $2"
-        )
-        .bind(comp.target.tenant_id)
-        .bind(comp.target.bucket_hour)
-        .fetch_optional(&mut *tx)
-        .await?;
-
-        if let Some((pub_ver,)) = current_version {
-            if comp.version <= pub_ver {
-                warn!(
-                    "Stale worker write rejected: tenant={}, hour={}, incoming_ver={}, pub_ver={}",
-                    comp.target.tenant_id, comp.target.bucket_hour, comp.version, pub_ver
-                );
-                tx.rollback().await?;
-                return Ok(PublishResult::RejectedStale);
-            }
-        }
-
-        // 3. Ensure tenant exists in analytics DB to satisfy foreign key constraint
-        sqlx::query(
-            "INSERT INTO tenants (id, name) VALUES ($1, 'Synced Tenant') ON CONFLICT (id) DO NOTHING"
-        )
-        .bind(comp.target.tenant_id)
-        .execute(&mut *tx)
-        .await?;
-
-        // 4. Delete old rollups for this bucket
-        sqlx::query("DELETE FROM agg_hourly WHERE tenant_id = $1 AND hour = $2")
-            .bind(comp.target.tenant_id)
-            .bind(comp.target.bucket_hour)
-            .execute(&mut *tx)
-            .await?;
-
-        sqlx::query("DELETE FROM agg_hourly_product WHERE tenant_id = $1 AND hour = $2")
-            .bind(comp.target.tenant_id)
-            .bind(comp.target.bucket_hour)
-            .execute(&mut *tx)
-            .await?;
-
-        // 4. Insert recomputed status rollups (if empty, none are inserted!)
-        for sr in &comp.status_rollups {
-            sqlx::query(
-                "INSERT INTO agg_hourly (tenant_id, hour, status, order_count, sales_paise) \
-                 VALUES ($1, $2, $3, $4, $5)"
-            )
-            .bind(comp.target.tenant_id)
-            .bind(comp.target.bucket_hour)
-            .bind(&sr.status)
-            .bind(sr.order_count)
-            .bind(sr.sales_paise)
-            .execute(&mut *tx)
-            .await?;
-        }
-
-        // 5. Insert recomputed product rollups
-        for pr in &comp.product_rollups {
-            sqlx::query(
-                "INSERT INTO agg_hourly_product (tenant_id, hour, product_id, category, units, sales_paise) \
-                 VALUES ($1, $2, $3, $4, $5, $6)"
-            )
-            .bind(comp.target.tenant_id)
-            .bind(comp.target.bucket_hour)
-            .bind(pr.product_id)
-            .bind(&pr.category)
-            .bind(pr.units)
-            .bind(pr.sales_paise)
-            .execute(&mut *tx)
-            .await?;
-        }
-
-        // 6. Update bucket_state with published version
-        sqlx::query(
-            r#"
-            INSERT INTO bucket_state (tenant_id, hour, published_version, computed_at)
-            VALUES ($1, $2, $3, NOW())
-            ON CONFLICT (tenant_id, hour) 
-            DO UPDATE SET published_version = EXCLUDED.published_version, computed_at = EXCLUDED.computed_at
-            "#
-        )
-        .bind(comp.target.tenant_id)
-        .bind(comp.target.bucket_hour)
-        .bind(comp.version)
-        .execute(&mut *tx)
-        .await?;
-
-        tx.commit().await?;
-        Ok(PublishResult::Published)
+    pub fn worker_id(&self) -> &str {
+        &self.worker_id
     }
 
-    /// Acknowledge outbox batch predicated on claimed_by and claim_token
-    pub async fn acknowledge_batch(&self, batch: &ClaimedBatch) -> Result<u64> {
-        let ids: Vec<i64> = batch.rows.iter().map(|r| r.id).collect();
-        let res = sqlx::query(
-            r#"
-            UPDATE outbox
-            SET status = 'done', processed_at = NOW()
-            WHERE id = ANY($1)
-              AND claimed_by = $2
-              AND claim_token = $3
-              AND status = 'claimed'
-            "#
-        )
-        .bind(&ids)
-        .bind(&batch.claimed_by)
-        .bind(batch.claim_token)
-        .execute(&self.source_pool)
-        .await?;
-
-        Ok(res.rows_affected())
+    pub fn store(&self) -> &AnalyticsStore {
+        &self.store
     }
 
-    /// Process one iteration of claiming, recomputing, publishing, and acking
-    pub async fn process_one_batch(&self) -> Result<usize> {
-        let batch = match self.claim_batch().await? {
-            Some(b) => b,
-            None => return Ok(0),
-        };
+    /// Processes a single claimed bucket with lease heartbeat and snapshot recompute.
+    pub async fn process_bucket(&self, claim: ClaimedBucket) -> Result<PublishResult> {
+        let (heartbeat_cancel_tx, mut heartbeat_cancel_rx) = tokio::sync::oneshot::channel::<()>();
+        let store = self.store.clone();
+        let token = claim.claim_token.clone();
+        let lease_secs = self.config.lease_secs as i64;
+        let heartbeat_interval = Duration::from_secs(self.config.heartbeat_secs.max(1));
 
-        let row_count = batch.rows.len();
-        let targets = self.deduplicate_targets(&batch);
-
-        for (target, version) in targets {
-            match self.recompute_bucket(&target, version).await {
-                Ok(comp) => {
-                    if let Err(e) = self.publish_bucket(&comp).await {
-                        error!("Failed to publish bucket ({}, {}): {}", target.tenant_id, target.bucket_hour, e);
+        // Background heartbeat task
+        let heartbeat_handle = tokio::spawn(async move {
+            let mut ticker = tokio::time::interval(heartbeat_interval);
+            ticker.tick().await; // consume initial tick
+            loop {
+                tokio::select! {
+                    _ = &mut heartbeat_cancel_rx => break,
+                    _ = ticker.tick() => {
+                        if let Err(e) = store.heartbeat(&token, lease_secs).await {
+                            warn!("Heartbeat failed for token {}: {}", token, e);
+                            break;
+                        }
                     }
                 }
-                Err(e) => {
-                    error!("Failed to recompute bucket ({}, {}): {}", target.tenant_id, target.bucket_hour, e);
+            }
+        });
+
+        // Reader lookup
+        let reader = self
+            .readers
+            .get(&claim.key.source_id)
+            .ok_or_else(|| anyhow!("No reader found for source {}", claim.key.source_id));
+
+        let res = match reader {
+            Ok(r) => {
+                // Open consistent snapshot and recompute
+                match r.begin_snapshot().await {
+                    Ok(snapshot) => match snapshot.compute(&claim.key).await {
+                        Ok(aggregate) => self.store.publish_bucket(&claim, &aggregate).await,
+                        Err(e) => Err(anyhow!("Compute error: {:#}", e)),
+                    },
+                    Err(e) => Err(anyhow!("Snapshot begin error: {:#}", e)),
                 }
             }
+            Err(e) => Err(e),
+        };
+
+        // Terminate heartbeat
+        let _ = heartbeat_cancel_tx.send(());
+        let _ = heartbeat_handle.await;
+
+        match res {
+            Ok(pub_res) => Ok(pub_res),
+            Err(err) => {
+                let err_msg = format!("{:#}", err);
+                error!("Worker error on bucket {:?}: {}", claim.key, err_msg);
+                self.store
+                    .handle_failure(
+                        &claim,
+                        &err_msg,
+                        self.config.max_attempts as i32,
+                        self.config.backoff_base_ms,
+                    )
+                    .await?;
+                Err(err)
+            }
         }
-
-        // Acknowledge claimed outbox rows
-        self.acknowledge_batch(&batch).await?;
-
-        Ok(row_count)
     }
 
-    /// Run continuous loop until shutdown signal is received
-    pub async fn run_loop(&self, running: Arc<AtomicBool>, poll_interval_ms: u64) -> Result<()> {
-        info!("Worker loop started (poll_interval = {}ms)...", poll_interval_ms);
-        while running.load(Ordering::Relaxed) {
-            match self.process_one_batch().await {
-                Ok(0) => {
-                    tokio::time::sleep(Duration::from_millis(poll_interval_ms)).await;
+    /// Claims and processes up to `batch_size` buckets.
+    pub async fn run_once(&self) -> Result<usize> {
+        let claims = self
+            .store
+            .claim_buckets(
+                None,
+                &self.worker_id,
+                self.config.batch_size as i64,
+                self.config.lease_secs as i64,
+            )
+            .await?;
+
+        if claims.is_empty() {
+            return Ok(0);
+        }
+
+        let total = claims.len();
+        let semaphore = Arc::new(Semaphore::new(self.config.concurrency.max(1)));
+        let mut handles = Vec::new();
+
+        for claim in claims {
+            let permit = semaphore.clone().acquire_owned().await?;
+            let this = self.clone();
+
+            handles.push(tokio::spawn(async move {
+                let _permit = permit;
+                let _ = this.process_bucket(claim).await;
+            }));
+        }
+
+        for h in handles {
+            let _ = h.await;
+        }
+
+        Ok(total)
+    }
+
+    /// Drains all currently queued dirty buckets until empty.
+    pub async fn drain_all(&self) -> Result<usize> {
+        let mut total = 0;
+        loop {
+            let processed = self.run_once().await?;
+            if processed == 0 {
+                break;
+            }
+            total += processed;
+        }
+        Ok(total)
+    }
+
+    /// Initial backfill: populates dirty_buckets directly from raw source records.
+    pub async fn backfill(&self) -> Result<usize> {
+        let mut total_buckets = 0;
+
+        for (src_id, src_cfg) in self.source_configs.as_ref() {
+            let entity = src_cfg.mapping.entity.as_str();
+            let tenant_field = src_cfg.mapping.tenant_id_field.as_str();
+            let created_field = src_cfg.mapping.created_at_field.as_str();
+
+            let mut bucket_keys = Vec::new();
+
+            match src_cfg.kind {
+                SourceKind::Postgres => {
+                    let dsn = src_cfg.resolve_dsn()?;
+                    let pool = sqlx::PgPool::connect(&dsn).await?;
+                    let sql = format!(
+                        "SELECT DISTINCT {tenant_field} as tenant_id, date_trunc('hour', {created_field}) as hour FROM {entity};"
+                    );
+                    let rows = sqlx::query(&sql).fetch_all(&pool).await?;
+                    for r in rows {
+                        let tenant_id: String = sqlx::Row::get(&r, "tenant_id");
+                        let hour: chrono::DateTime<chrono::Utc> = sqlx::Row::get(&r, "hour");
+                        bucket_keys.push(BucketKey::new(src_id, tenant_id, hour));
+                    }
                 }
-                Ok(n) => {
-                    // Work was processed; immediately poll again without sleep
-                    tracing::debug!("Processed {} outbox rows", n);
+                SourceKind::Mysql => {
+                    let dsn = src_cfg.resolve_dsn()?;
+                    let pool = sqlx::MySqlPool::connect(&dsn).await?;
+                    let sql = format!(
+                        "SELECT DISTINCT {tenant_field} as tenant_id, DATE_FORMAT({created_field}, '%Y-%m-%d %H:00:00') as hour FROM {entity};"
+                    );
+                    let rows = sqlx::query(&sql).fetch_all(&pool).await?;
+                    for r in rows {
+                        let tenant_id: String = sqlx::Row::get(&r, "tenant_id");
+                        let hour_str: String = sqlx::Row::get(&r, "hour");
+                        if let Ok(naive) = chrono::NaiveDateTime::parse_from_str(&hour_str, "%Y-%m-%d %H:%M:%S") {
+                            let hour = chrono::DateTime::from_naive_utc_and_offset(naive, chrono::Utc);
+                            bucket_keys.push(BucketKey::new(src_id, tenant_id, hour));
+                        }
+                    }
                 }
-                Err(e) => {
-                    error!("Worker loop iteration error: {}", e);
-                    tokio::time::sleep(Duration::from_millis(poll_interval_ms)).await;
+                SourceKind::Mongo => {
+                    let dsn = src_cfg.resolve_dsn()?;
+                    let client = mongodb::Client::with_uri_str(&dsn).await?;
+                    let db_name = mongodb::options::ClientOptions::parse(&dsn)
+                        .await?
+                        .default_database
+                        .unwrap_or_else(|| "source_db".to_string());
+                    let coll = client.database(&db_name).collection::<mongodb::bson::Document>(entity);
+
+                    let pipeline = vec![
+                        mongodb::bson::doc! {
+                            "$group": {
+                                "_id": {
+                                    "tenant_id": format!("${}", tenant_field),
+                                    "year": { "$year": format!("${}", created_field) },
+                                    "month": { "$month": format!("${}", created_field) },
+                                    "day": { "$dayOfMonth": format!("${}", created_field) },
+                                    "hour": { "$hour": format!("${}", created_field) }
+                                }
+                            }
+                        }
+                    ];
+                    let mut cursor = coll.aggregate(pipeline).await?;
+                    while let Some(Ok(doc)) = futures::StreamExt::next(&mut cursor).await {
+                        if let Ok(id_doc) = doc.get_document("_id") {
+                            let tenant_id = id_doc.get_str("tenant_id").unwrap_or_default().to_string();
+                            let y = id_doc.get_i32("year").unwrap_or(2026);
+                            let m = id_doc.get_i32("month").unwrap_or(1) as u32;
+                            let d = id_doc.get_i32("day").unwrap_or(1) as u32;
+                            let h = id_doc.get_i32("hour").unwrap_or(0) as u32;
+                            if let Some(hour) = chrono::Utc.with_ymd_and_hms(y, m, d, h, 0, 0).single() {
+                                bucket_keys.push(BucketKey::new(src_id, tenant_id, hour));
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !bucket_keys.is_empty() {
+                total_buckets += bucket_keys.len();
+                self.store.upsert_dirty_and_cursor(src_id, &bucket_keys, None).await?;
+            }
+        }
+
+        info!("Backfill marked {} distinct buckets dirty across all sources", total_buckets);
+        self.drain_all().await?;
+
+        Ok(total_buckets)
+    }
+
+    /// Daemon execution loop.
+    pub async fn start_daemon(
+        self: Arc<Self>,
+        mut shutdown: broadcast::Receiver<()>,
+    ) {
+        info!("Starting WorkerEngine daemon (worker_id={})...", self.worker_id);
+
+        loop {
+            tokio::select! {
+                _ = shutdown.recv() => {
+                    info!("WorkerEngine received shutdown signal, stopping...");
+                    break;
+                }
+                res = self.run_once() => {
+                    match res {
+                        Ok(0) => {
+                            tokio::time::sleep(Duration::from_millis(500)).await;
+                        }
+                        Ok(n) => {
+                            info!("Worker {} processed {} buckets", self.worker_id, n);
+                        }
+                        Err(e) => {
+                            error!("Worker loop error: {}", e);
+                            tokio::time::sleep(Duration::from_millis(1000)).await;
+                        }
+                    }
                 }
             }
         }
-        info!("Worker loop shut down cleanly.");
-        Ok(())
     }
 }

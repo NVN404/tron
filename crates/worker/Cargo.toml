@@ -5,16 +5,25 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-common = { workspace = true }
+platform-core = { workspace = true }
+analytics-store = { workspace = true }
+adapter-postgres = { path = "../adapter-postgres" }
+adapter-mysql = { path = "../adapter-mysql" }
+adapter-mongo = { path = "../adapter-mongo" }
+mongodb = { workspace = true }
+futures = { workspace = true }
 tokio = { workspace = true }
 sqlx = { workspace = true }
 tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 anyhow = { workspace = true }
 clap = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
+dotenvy = { workspace = true }
 
 [dev-dependencies]
-oracle = { workspace = true }
+tempfile = { workspace = true }
+capture = { path = "../capture" }

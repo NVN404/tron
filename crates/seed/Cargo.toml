@@ -5,16 +5,26 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+csv = "1.3"
+platform-core = { workspace = true }
+analytics-store = { workspace = true }
+adapter-postgres = { path = "../adapter-postgres" }
+adapter-mysql = { path = "../adapter-mysql" }
+adapter-mongo = { path = "../adapter-mongo" }
+api = { path = "../api" }
 common = { workspace = true }
 tokio = { workspace = true }
 sqlx = { workspace = true }
 tokio-postgres = { version = "0.7", features = ["with-uuid-1", "with-chrono-0_4"] }
+mongodb = { workspace = true }
 futures-util = "0.3"
 bytes = "1"
 clap = { workspace = true }
 tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 anyhow = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
 rand = "0.8"
 rand_distr = "0.4"
+dotenvy = { workspace = true }

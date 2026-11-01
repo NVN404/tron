@@ -22,7 +22,7 @@ pub struct TrendResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow)]
 pub struct TopProductResult {
-    pub product_id: Uuid,
+    pub product_id: String,
     pub category: String,
     pub units: i64,
     pub total_sales_paise: i64,
@@ -63,10 +63,9 @@ impl Oracle {
                 COALESCE(COUNT(*), 0)::BIGINT AS order_count,
                 COALESCE(SUM(amount_paise), 0)::BIGINT AS total_sales_paise
             FROM orders
-            WHERE tenant_id = $1
+            WHERE tenant_id = $1::text
               AND created_at >= $2
               AND created_at < $3
-              AND deleted_at IS NULL
               AND status = 'completed'
             "#,
         )
@@ -113,10 +112,9 @@ impl Oracle {
                     COUNT(*)::BIGINT AS order_count,
                     SUM(amount_paise)::BIGINT AS total_sales_paise
                 FROM orders
-                WHERE tenant_id = $1
+                WHERE tenant_id = $1::text
                   AND created_at >= $2
                   AND created_at < $3
-                  AND deleted_at IS NULL
                   AND status = 'completed'
                 GROUP BY 1
             )
@@ -166,10 +164,9 @@ impl Oracle {
                 COUNT(*)::BIGINT AS units,
                 SUM(amount_paise)::BIGINT AS total_sales_paise
             FROM orders
-            WHERE tenant_id = $1
+            WHERE tenant_id = $1::text
               AND created_at >= $2
               AND created_at < $3
-              AND deleted_at IS NULL
               AND status = 'completed'
             GROUP BY product_id, category
             ORDER BY total_sales_paise DESC, product_id ASC
@@ -201,10 +198,9 @@ impl Oracle {
                 COUNT(*)::BIGINT AS order_count,
                 COALESCE(SUM(amount_paise), 0)::BIGINT AS total_sales_paise
             FROM orders
-            WHERE tenant_id = $1
+            WHERE tenant_id = $1::text
               AND created_at >= $2
               AND created_at < $3
-              AND deleted_at IS NULL
             GROUP BY category, status
             ORDER BY category ASC, status ASC
             "#,
@@ -216,37 +212,5 @@ impl Oracle {
         .await?;
 
         Ok(rows)
-    }
-
-    /// Compares API JSON response against Oracle expected response. Returns Some(StructuredDiff) on discrepancy.
-    pub fn compare(
-        tenant_id: Uuid,
-        endpoint: &str,
-        from: &str,
-        to: &str,
-        expected: &serde_json::Value,
-        actual: &serde_json::Value,
-    ) -> Option<StructuredDiff> {
-        if expected == actual {
-            return None;
-        }
-
-        let mut mismatches = Vec::new();
-        if expected != actual {
-            mismatches.push(format!(
-                "Payload mismatch at {}: expected {}, got {}",
-                endpoint, expected, actual
-            ));
-        }
-
-        Some(StructuredDiff {
-            tenant_id,
-            endpoint: endpoint.to_string(),
-            range_from: from.to_string(),
-            range_to: to.to_string(),
-            expected: expected.clone(),
-            actual: actual.clone(),
-            mismatches,
-        })
     }
 }
